@@ -31,6 +31,3 @@ def load_russell_2000_from_ishares(save_csv: bool = True) -> pd.DataFrame:
 if __name__ == "__main__":
     holdings = load_russell_2000_from_ishares()
     print(holdings.head())
-
-
-122
