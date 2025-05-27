@@ -26,63 +26,39 @@ API_KEY = os.getenv("FMP_API_KEY")
 if not API_KEY:
     raise ValueError("FMP_API_KEY not found in environment variables")
 
-# Constants
-RATE_LIMIT = 300  # Maximum API calls per day
-RATE_LIMIT_DELAY = 0.1  # seconds between API calls (reduced since we have more calls available)
-MAX_RETRIES = 3
-RETRY_DELAY = 2  # seconds
+# Rate limiting parameters
+RATE_LIMIT_CALLS = 300  # Maximum calls per minute
+RATE_LIMIT_DELAY = 0.1  # Delay between calls in seconds
+last_call_time = 0
+call_count = 0
+minute_start_time = time.time()
 
-class APIRateLimiter:
-    def __init__(self, daily_limit: int):
-        self.daily_limit = daily_limit
-        self.requests_today = 0
-        self.last_reset = datetime.now()
-        self._load_state()
-
-    def _load_state(self):
-        """Load the state from a file if it exists."""
-        try:
-            if os.path.exists('api_state.json'):
-                with open('api_state.json', 'r') as f:
-                    state = json.load(f)
-                    self.requests_today = state.get('requests_today', 0)
-                    self.last_reset = datetime.fromisoformat(state.get('last_reset', datetime.now().isoformat()))
-        except Exception as e:
-            logging.warning(f"Failed to load API state: {str(e)}")
-
-    def _save_state(self):
-        """Save the current state to a file."""
-        try:
-            state = {
-                'requests_today': self.requests_today,
-                'last_reset': self.last_reset.isoformat()
-            }
-            with open('api_state.json', 'w') as f:
-                json.dump(state, f)
-        except Exception as e:
-            logging.warning(f"Failed to save API state: {str(e)}")
-
-    def check_and_update(self) -> bool:
-        """Check if we can make another request and update the counter."""
-        now = datetime.now()
-        
-        # Reset counter if it's a new day
-        if now.date() > self.last_reset.date():
-            self.requests_today = 0
-            self.last_reset = now
-            self._save_state()
-        
-        if self.requests_today >= self.daily_limit:
-            logging.warning(f"Daily API limit reached ({self.daily_limit} calls). "
-                          f"Next reset at {self.last_reset + timedelta(days=1)}")
-            return False
-            
-        self.requests_today += 1
-        self._save_state()
-        return True
-
-# Initialize rate limiter
-rate_limiter = APIRateLimiter(RATE_LIMIT)
+def check_rate_limit():
+    global last_call_time, call_count, minute_start_time
+    current_time = time.time()
+    
+    # Reset counter if a minute has passed
+    if current_time - minute_start_time >= 60:
+        call_count = 0
+        minute_start_time = current_time
+    
+    # Check if we've hit the rate limit
+    if call_count >= RATE_LIMIT_CALLS:
+        sleep_time = 60 - (current_time - minute_start_time)
+        if sleep_time > 0:
+            logging.warning(f"Rate limit reached (300 calls per minute). Waiting {sleep_time:.2f} seconds...")
+            time.sleep(sleep_time)
+            call_count = 0
+            minute_start_time = time.time()
+    
+    # Add delay between calls
+    if last_call_time > 0:
+        time_since_last_call = current_time - last_call_time
+        if time_since_last_call < RATE_LIMIT_DELAY:
+            time.sleep(RATE_LIMIT_DELAY - time_since_last_call)
+    
+    last_call_time = time.time()
+    call_count += 1
 
 def validate_financial_data(data: Dict) -> bool:
     """Validate the financial data for reasonable ranges and apply strategy rules."""
@@ -151,8 +127,8 @@ def validate_financial_data(data: Dict) -> bool:
 
 def make_api_request(url: str, ticker: str) -> Optional[dict]:
     """Make API request with retry logic and rate limiting."""
-    if not rate_limiter.check_and_update():
-        logging.error(f"Cannot make API request for {ticker} - daily limit reached")
+    if not check_rate_limit():
+        logging.error(f"Cannot make API request for {ticker} - rate limit reached")
         return None
 
     for attempt in range(MAX_RETRIES):
@@ -266,8 +242,8 @@ def pull_fundamentals_from_iwm_holdings() -> None:
         
         # Calculate estimated API calls needed
         estimated_calls = len(tickers) * 3  # 3 API calls per ticker
-        if estimated_calls > RATE_LIMIT:
-            logging.warning(f"Warning: Estimated API calls ({estimated_calls}) exceeds daily limit ({RATE_LIMIT})")
+        if estimated_calls > RATE_LIMIT_CALLS:
+            logging.warning(f"Warning: Estimated API calls ({estimated_calls}) exceeds rate limit ({RATE_LIMIT_CALLS})")
             logging.warning("Consider processing tickers in batches across multiple days")
 
         fundamentals_list = []
@@ -283,7 +259,7 @@ def pull_fundamentals_from_iwm_holdings() -> None:
 
         df = pd.DataFrame(fundamentals_list)
         logging.info(f"Created DataFrame with {len(df)} rows")
-        logging.info(f"API calls made today: {rate_limiter.requests_today}")
+        logging.info(f"API calls made today: {call_count}")
 
         output_dir = os.path.dirname(__file__)
         today = date.today().strftime('%Y-%m-%d')
