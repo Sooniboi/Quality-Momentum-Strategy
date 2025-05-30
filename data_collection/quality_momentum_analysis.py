@@ -164,6 +164,139 @@ def determine_style(row) -> str:
     else:
         return "Weak"
 
+def get_sector_weights() -> Dict:
+    """Define sector-specific weights for scoring."""
+    return {
+        'Technology': {
+            'ROIC': 0.20,
+            'Operating Margin': 0.15,
+            'Revenue Growth': 0.25,
+            'FCF': 0.15,
+            'Net Debt to EBITDA': 0.10,
+            '3M Return': 0.10,
+            '6M Return': 0.05
+        },
+        'Healthcare': {
+            'ROIC': 0.15,
+            'Operating Margin': 0.20,
+            'Revenue Growth': 0.20,
+            'FCF': 0.20,
+            'Net Debt to EBITDA': 0.10,
+            '3M Return': 0.10,
+            '6M Return': 0.05
+        },
+        'Financial Services': {
+            'ROIC': 0.25,
+            'Operating Margin': 0.15,
+            'Revenue Growth': 0.15,
+            'FCF': 0.15,
+            'Net Debt to EBITDA': 0.15,
+            '3M Return': 0.10,
+            '6M Return': 0.05
+        },
+        'Real Estate': {
+            'ROIC': 0.15,
+            'Operating Margin': 0.15,
+            'Revenue Growth': 0.10,
+            'FCF': 0.30,
+            'Net Debt to EBITDA': 0.15,
+            '3M Return': 0.10,
+            '6M Return': 0.05
+        },
+        'Consumer Cyclical': {
+            'ROIC': 0.20,
+            'Operating Margin': 0.20,
+            'Revenue Growth': 0.15,
+            'FCF': 0.15,
+            'Net Debt to EBITDA': 0.10,
+            '3M Return': 0.10,
+            '6M Return': 0.10
+        },
+        'Consumer Defensive': {
+            'ROIC': 0.15,
+            'Operating Margin': 0.20,
+            'Revenue Growth': 0.10,
+            'FCF': 0.20,
+            'Net Debt to EBITDA': 0.15,
+            '3M Return': 0.10,
+            '6M Return': 0.10
+        },
+        'Industrials': {
+            'ROIC': 0.20,
+            'Operating Margin': 0.15,
+            'Revenue Growth': 0.15,
+            'FCF': 0.20,
+            'Net Debt to EBITDA': 0.10,
+            '3M Return': 0.10,
+            '6M Return': 0.10
+        },
+        'Energy': {
+            'ROIC': 0.15,
+            'Operating Margin': 0.15,
+            'Revenue Growth': 0.10,
+            'FCF': 0.25,
+            'Net Debt to EBITDA': 0.15,
+            '3M Return': 0.10,
+            '6M Return': 0.10
+        },
+        'Basic Materials': {
+            'ROIC': 0.20,
+            'Operating Margin': 0.15,
+            'Revenue Growth': 0.10,
+            'FCF': 0.20,
+            'Net Debt to EBITDA': 0.15,
+            '3M Return': 0.10,
+            '6M Return': 0.10
+        },
+        'Communication Services': {
+            'ROIC': 0.15,
+            'Operating Margin': 0.15,
+            'Revenue Growth': 0.20,
+            'FCF': 0.15,
+            'Net Debt to EBITDA': 0.15,
+            '3M Return': 0.10,
+            '6M Return': 0.10
+        },
+        'Utilities': {
+            'ROIC': 0.15,
+            'Operating Margin': 0.15,
+            'Revenue Growth': 0.05,
+            'FCF': 0.30,
+            'Net Debt to EBITDA': 0.15,
+            '3M Return': 0.10,
+            '6M Return': 0.10
+        }
+    }
+
+def normalize_metric(series: pd.Series) -> pd.Series:
+    """Normalize a metric using z-score within its sector."""
+    return (series - series.mean()) / series.std()
+
+def calculate_sector_score(row: pd.Series, sector: str, sector_weights: Dict) -> float:
+    """Calculate sector-specific composite score."""
+    # Get weights for the sector (default to equal weights if sector not found)
+    weights = sector_weights.get(sector, {
+        'ROIC': 0.15,
+        'Operating Margin': 0.15,
+        'Revenue Growth': 0.15,
+        'FCF': 0.15,
+        'Net Debt to EBITDA': 0.15,
+        '3M Return': 0.15,
+        '6M Return': 0.10
+    })
+    
+    # Calculate weighted score
+    score = 0
+    for metric, weight in weights.items():
+        if pd.notna(row[metric]):
+            # For Net Debt to EBITDA, lower is better, so we invert the score
+            if metric == 'Net Debt to EBITDA':
+                score += (1 - row[metric]) * weight
+            else:
+                score += row[metric] * weight
+    
+    return score
+
 def main(test_mode: bool = False):
     try:
         # Read fundamental momentum data
@@ -190,39 +323,63 @@ def main(test_mode: bool = False):
         # Determine investment style
         df['Style'] = df.apply(determine_style, axis=1)
         
-        # Calculate rankings
-        df['Overall Rank'] = df['Overall Score'].rank(ascending=False)
-        df['Sector Rank'] = df.groupby('Sector')['Overall Score'].rank(ascending=False)
+        # Get sector weights
+        sector_weights = get_sector_weights()
         
-        # Select only essential columns for output
-        output_columns = [
-            'Ticker',
-            'Sector',
-            'Style',
-            'Overall Score',
-            'Quality Score',
-            'Momentum Score',
-            'Overall Rank',
-            'Sector Rank'
+        # Normalize metrics within sectors
+        metrics_to_normalize = [
+            'ROIC', 'Operating Margin', 'Revenue Growth', 'FCF', 
+            'Net Debt to EBITDA', '3M Return', '6M Return'
         ]
+        
+        for metric in metrics_to_normalize:
+            df[f'{metric}_Normalized'] = df.groupby('Sector')[metric].transform(normalize_metric)
+        
+        # Calculate sector-specific scores
+        df['Sector Score'] = df.apply(lambda row: calculate_sector_score(row, row['Sector'], sector_weights), axis=1)
+        
+        # Rank within sectors
+        df['Sector Rank'] = df.groupby('Sector')['Sector Score'].rank(ascending=False)
+        
+        # Sort by sector and rank
+        df = df.sort_values(['Sector', 'Sector Rank'])
         
         # Save results
         output_dir = os.path.join(os.path.dirname(__file__), '..', 'csv_data_files')
-        output_path = os.path.join(output_dir, "quality_momentum_analysis.csv")
+        today = date.today().strftime('%Y-%m-%d')
         
-        df[output_columns].to_csv(output_path, index=False)
-        print(f"\nResults saved to: {output_path}")
+        # Save all companies with scores
+        output_path = os.path.join(output_dir, f"sp600_sector_scored_{today}.csv")
+        df.to_csv(output_path, index=False)
+        print(f"\nAll companies with sector scores saved to: {output_path}")
         
-        # Print summary
-        print("\nStyle Distribution:")
-        print(df['Style'].value_counts())
-        
-        print("\nTop Companies by Style:")
-        for style in df['Style'].unique():
-            print(f"\n{style}:")
-            style_companies = df[df['Style'] == style].sort_values('Overall Score', ascending=False).head(3)
-            for _, row in style_companies.iterrows():
-                print(f"{row['Ticker']} ({row['Sector']}): Overall = {row['Overall Score']:.2f}, Quality = {row['Quality Score']:.2f}, Momentum = {row['Momentum Score']:.2f}")
+        # Print detailed summary by sector
+        print("\nDetailed Sector Summary:")
+        for sector in sorted(df['Sector'].unique()):
+            sector_companies = df[df['Sector'] == sector]
+            print(f"\n{sector} (Total companies: {len(sector_companies)}):")
+            print("-" * 80)
+            
+            # Print top 5 companies in each sector
+            top_5 = sector_companies.head(5)
+            for _, row in top_5.iterrows():
+                print(f"\n{row['Ticker']} (Score: {row['Sector Score']:.2f}, Rank: {row['Sector Rank']:.0f})")
+                print(f"  Quality Metrics:")
+                print(f"    ROIC: {row['ROIC']:.2%}")
+                print(f"    Operating Margin: {row['Operating Margin']:.2%}")
+                print(f"    FCF: ${row['FCF']:,.0f}")
+                print(f"    Net Debt to EBITDA: {row['Net Debt to EBITDA']:.2f}")
+                print(f"  Growth Metrics:")
+                print(f"    Revenue Growth: {row['Revenue Growth']:.2%}")
+                print(f"  Momentum Metrics:")
+                print(f"    3M Return: {row['3M Return']:.2%}")
+                print(f"    6M Return: {row['6M Return']:.2%}")
+            
+            # Print sector statistics
+            print(f"\nSector Statistics:")
+            print(f"  Average Score: {sector_companies['Sector Score'].mean():.2f}")
+            print(f"  Median Score: {sector_companies['Sector Score'].median():.2f}")
+            print(f"  Score Range: {sector_companies['Sector Score'].min():.2f} to {sector_companies['Sector Score'].max():.2f}")
         
     except Exception as e:
         print(f"Error occurred: {str(e)}")
