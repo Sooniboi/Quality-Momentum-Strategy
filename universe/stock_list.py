@@ -13,7 +13,7 @@ def load_sp600_from_wikipedia(save_csv: bool = True) -> pd.DataFrame:
     
     # Print column names for debugging
     print("Available columns:", df.columns.tolist())
-    
+
     # Keep only relevant columns (using exact column names from Wikipedia)
     keep_cols = [
         'Symbol',
