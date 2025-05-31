@@ -1,3 +1,5 @@
 find a trading platform or broakrage platform like trading view where we can preform paper trading to backtest strategy.
 research how we can run our code automatically on a weekly / monthly - cron
 set it up on axzure or aws virtual machine
+
+money
