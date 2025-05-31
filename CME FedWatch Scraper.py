@@ -3,6 +3,15 @@ from playwright.async_api import async_playwright
 import pandas as pd
 from datetime import datetime
 
+def parse_date(date_str):
+    if not date_str:
+        return None
+    try:
+        # Convert "April 2025" to datetime
+        return pd.to_datetime(date_str, format="%B %Y")
+    except:
+        return None
+
 async def scrape_fed_data():
     try:
         print("Starting Playwright...")
@@ -30,14 +39,14 @@ async def scrape_fed_data():
                 # Get the date which is in the next span
                 date_element = await page.query_selector('span._date_1sxcz_17')
                 if date_element:
-                    date_text = await date_element.text_content()
-                    inflation_text = f"{inflation_rate} ({date_text})"
+                    inflation_date = await date_element.text_content()
                 else:
-                    inflation_text = inflation_rate
-                print(f"Found Inflation: {inflation_text}")
+                    inflation_date = None
+                print(f"Found Inflation: {inflation_rate} ({inflation_date})")
             else:
                 print("Inflation element not found")
-                inflation_text = "Not found"
+                inflation_rate = "Not found"
+                inflation_date = None
             
             # Get Unemployment Rate with exact class combination (same structure as PCE)
             unemployment_element = await page.query_selector('div.homepageBox:has-text("Unemployment Rate") span._bold_1sxcz_1._smaller_1sxcz_11')
@@ -46,31 +55,26 @@ async def scrape_fed_data():
                 # Get the date which is in the next span
                 date_element = await page.query_selector('div.homepageBox:has-text("Unemployment Rate") span._date_1sxcz_17')
                 if date_element:
-                    date_text = await date_element.text_content()
-                    unemployment_text = f"{unemployment_rate} ({date_text})"
+                    unemployment_date = await date_element.text_content()
                 else:
-                    unemployment_text = unemployment_rate
-                print(f"Found Unemployment: {unemployment_text}")
+                    unemployment_date = None
+                print(f"Found Unemployment: {unemployment_rate} ({unemployment_date})")
             else:
                 print("Unemployment element not found")
-                unemployment_text = "Not found"
+                unemployment_rate = "Not found"
+                unemployment_date = None
             
-            # Take screenshot for debugging
-            await page.screenshot(path='debug_screenshot.png')
-            print("\nSaved debug screenshot to debug_screenshot.png")
-            
-            # Print the HTML structure around the elements for debugging
-            html_content = await page.content()
-            print("\nRelevant HTML structure:")
-            print(html_content[:1000])
-            
-            # Create DataFrame
+            # Create DataFrame with separate value and date columns
             data = {
                 'Metric': ['Fed Funds Target Range', 'PCE Inflation', 'Unemployment Rate'],
-                'Value': [fed_funds_rate, inflation_text, unemployment_text],
-                'Date Scraped': [datetime.now()] * 3
+                'Value': [fed_funds_rate, inflation_rate, unemployment_rate],
+                'Forecast Date': [None, inflation_date, unemployment_date],  # Fed Funds has no forecast date
+                'Scrape Timestamp': [datetime.now()] * 3
             }
             df = pd.DataFrame(data)
+            
+            # Convert the Forecast Date column to datetime
+            df['Forecast Date'] = df['Forecast Date'].apply(parse_date)
             
             print("\nScraped Data:")
             print("=" * 50)
