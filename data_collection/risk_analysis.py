@@ -12,7 +12,7 @@ API_KEY = os.getenv("FMP_API_KEY")
 
 def get_latest_portfolio_file() -> str:
     """Get the latest selected portfolio CSV file."""
-    pattern = os.path.join(os.path.dirname(__file__), '..', 'csv_data_files', 'selected_portfolio_*.csv')
+    pattern = os.path.join(os.path.dirname(__file__), '..', 'csv_data_files', 'csv_datas', 'selected_portfolio_*.csv')
     import glob
     files = glob.glob(pattern)
     if not files:
@@ -341,7 +341,7 @@ def main():
         generate_risk_report(portfolio_df, risk_metrics)
         
         # Save risk metrics
-        output_dir = os.path.join(os.path.dirname(__file__), '..', 'csv_data_files')
+        output_dir = os.path.join(os.path.dirname(__file__), '..', 'csv_data_files', 'risk_analysis')
         today = date.today().strftime('%Y-%m-%d')
         
         # Save correlation matrix if available

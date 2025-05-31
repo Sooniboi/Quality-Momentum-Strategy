@@ -1,2 +1,2 @@
-analysis_date,ten_year_rate,yield_curve_slope,curve_shape,vix,rate_environment,market_regime,risk_multiplier
-2025-05-31,4.41,0.52,Normal,18.57,Moderate,Mid Cycle - Normal Volatility,1.0
+analysis_date,fed_funds_rate,ten_year_rate,curve_2s10s_bps,fed_10y_spread_bps,curve_shape,vix,rate_environment,market_regime,risk_multiplier,recession_risk,recession_probability,recession_confidence,recession_time_horizon,key_risk_factors,fed_bias,cut_probability,hold_probability,hike_probability,days_to_fed_meeting,next_fed_meeting,fed_proximity_effect,tactical_recommendation
+2025-05-31,5.25,4.41,52.0,-83.99999999999999,Normal,18.57,Dovish Expectations,Mid Cycle - Normal Volatility,1.1,Low,0,Low,24+ months,,Unknown,0,0,0,0,Unknown,Neutral,Standard positioning
