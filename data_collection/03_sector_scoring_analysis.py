@@ -16,10 +16,14 @@ if not API_KEY:
 
 def get_latest_fundamental_momentum_file() -> str:
     """Get the latest fundamental momentum CSV file."""
-    pattern = os.path.join(os.path.dirname(__file__), '..', 'csv_data_files', 'sp600_fundamental_momentum.csv')
-    if not os.path.exists(pattern):
+    pattern = os.path.join(os.path.dirname(__file__), '..', 'csv_data_files', '02_fundamentals_with_momentum*.csv')
+    files = glob.glob(pattern)
+    
+    if not files:
         raise FileNotFoundError("No fundamental momentum CSV file found.")
-    return pattern
+    
+    # Return the most recent file
+    return max(files, key=os.path.getctime)
 
 def get_sector_metrics(sector: str, api_key: str) -> Dict:
     """Get sector averages and standard deviations from FMP."""
@@ -202,180 +206,146 @@ def get_sector_weights() -> Dict:
             'Operating Margin': 0.15,
             'Revenue Growth': 0.05,
             'FCF': 0.30,
-            'Net Debt to EBITDA': 0.15,
+            'Net Debt to EBITDA': 0.20,
             '3M Return': 0.10,
-            '6M Return': 0.10
+            '6M Return': 0.05
         }
     }
 
 def normalize_metric(series: pd.Series) -> pd.Series:
-    """Normalize a metric using z-score within its sector."""
-    return (series - series.mean()) / series.std()
+    """Normalize a series to 0-1 scale."""
+    return (series - series.min()) / (series.max() - series.min())
 
 def calculate_sector_score(row: pd.Series, sector: str, sector_weights: Dict) -> float:
-    """Calculate sector-specific composite score."""
-    # Get weights for the sector (default to equal weights if sector not found)
-    weights = sector_weights.get(sector, {
-        'ROIC': 0.15,
-        'Operating Margin': 0.15,
-        'Revenue Growth': 0.15,
-        'FCF': 0.15,
-        'Net Debt to EBITDA': 0.15,
-        '3M Return': 0.15,
-        '6M Return': 0.10
-    })
+    """Calculate weighted sector score for a stock."""
+    if sector not in sector_weights:
+        sector = 'Technology'  # Default fallback
     
-    # Calculate weighted score
+    weights = sector_weights[sector]
     score = 0
+    
     for metric, weight in weights.items():
-        if pd.notna(row[metric]):
-            # For Net Debt to EBITDA, lower is better, so we invert the score
-            if metric == 'Net Debt to EBITDA':
-                score += (1 - row[metric]) * weight
-            else:
-                score += row[metric] * weight
+        z_score_col = f'{metric}_sector_z'
+        if z_score_col in row and not pd.isna(row[z_score_col]):
+            # Convert z-score to 0-10 scale (cap at ±3 standard deviations)
+            normalized_z = max(-3, min(3, row[z_score_col]))
+            metric_score = (normalized_z + 3) / 6 * 10  # Scale to 0-10
+            score += weight * metric_score
     
     return score
 
 def determine_style(row) -> str:
-    """Determine investment style based on sector-normalized scores.
+    """Determine investment style based on metrics."""
+    roic = row.get('ROIC', 0)
+    revenue_growth = row.get('Revenue Growth', 0)
+    pe_ratio = row.get('pe_ratio', 0)
+    momentum_3m = row.get('3M Return', 0)
+    operating_margin = row.get('Operating Margin', 0)
     
-    Style Definitions (using sector-normalized scores):
-    - Quality: Quality Score > 1.0 (excellent fundamentals relative to sector)
-    - Growth: Quality Score > 0.5 AND Momentum Score > 0.5 (good fundamentals with strong momentum relative to sector)
-    - Value: Quality Score > 0.5 AND Momentum Score <= 0.5 (good fundamentals but lower momentum relative to sector)
-    - Blend: Quality Score between -0.5 and 0.5 (average fundamentals relative to sector)
-    - Weak: Quality Score < -0.5 (poor fundamentals relative to sector)
-    """
-    if row['Quality Score'] > 1.0:
-        return "Quality"
-    elif row['Quality Score'] > 0.5:
-        if row['Momentum Score'] > 0.5:
-            return "Growth"
-        else:
-            return "Value"
-    elif row['Quality Score'] >= -0.5:
-        return "Blend"
-    else:
-        return "Weak"
+    # Weak companies (filtered out)
+    if roic < 0 or operating_margin < 0:
+        return 'Weak'
+    
+    # Quality: High ROIC, good margins, stable growth
+    if roic > 0.15 and operating_margin > 0.10:
+        return 'Quality'
+    
+    # Growth: High revenue growth and momentum
+    if revenue_growth > 0.15 and momentum_3m > 0.05:
+        return 'Growth'
+    
+    # Value: Low PE, positive fundamentals
+    if 0 < pe_ratio < 15 and roic > 0.05:
+        return 'Value'
+    
+    # Default to Blend
+    return 'Blend'
 
 def calculate_sector_scores(df: pd.DataFrame) -> pd.DataFrame:
-    """Calculate sector-specific scores using sector-normalized z-scores."""
-    # Quality metrics weights (consistent across sectors)
-    quality_weights = {
-        'ROIC': 0.3,
-        'Operating Margin': 0.3,
-        'FCF': 0.2,
-        'Net Debt to EBITDA': 0.2
-    }
+    """Calculate sector-relative scores using z-score methodology."""
+    print(f"Calculating sector scores for {len(df)} companies...")
     
-    # Momentum metrics weights (consistent across sectors)
-    momentum_weights = {
-        '3M Return': 0.5,
-        '6M Return': 0.5
-    }
+    # Calculate z-scores
+    df = calculate_z_scores(df)
     
-    # Calculate Quality Score using sector-normalized z-scores
-    df['Quality Score'] = (
-        df['ROIC_sector_z'] * quality_weights['ROIC'] +
-        df['Operating Margin_sector_z'] * quality_weights['Operating Margin'] +
-        df['FCF_sector_z'] * quality_weights['FCF'] +
-        (-df['Net Debt to EBITDA_sector_z']) * quality_weights['Net Debt to EBITDA']
-    )
+    # Get sector weights
+    sector_weights = get_sector_weights()
     
-    # Calculate Momentum Score using sector-normalized z-scores
-    df['Momentum Score'] = (
-        df['3M Return_sector_z'] * momentum_weights['3M Return'] +
-        df['6M Return_sector_z'] * momentum_weights['6M Return']
-    )
+    # Calculate sector scores
+    df['Sector Score'] = df.apply(lambda row: calculate_sector_score(row, row['Sector'], sector_weights), axis=1)
     
-    # Calculate Overall Score (60% Quality, 40% Momentum)
-    df['Overall Score'] = df['Quality Score'] * 0.6 + df['Momentum Score'] * 0.4
+    # Calculate quality and momentum scores
+    quality_metrics = ['ROIC_sector_z', 'Operating Margin_sector_z', 'FCF_sector_z']
+    momentum_metrics = ['3M Return_sector_z', '6M Return_sector_z']
+    
+    df['Quality Score'] = df[quality_metrics].mean(axis=1)
+    df['Momentum Score'] = df[momentum_metrics].mean(axis=1)
+    df['Overall Score'] = 0.6 * df['Quality Score'] + 0.4 * df['Momentum Score']
+    
+    # Add style classification
+    df['Style'] = df.apply(determine_style, axis=1)
+    
+    # Add sector ranking
+    df['Sector Rank'] = df.groupby('Sector')['Overall Score'].rank(ascending=False, method='min')
+    
+    # Sort by overall score
+    df = df.sort_values('Overall Score', ascending=False)
+    
+    print(f"Scoring complete! Top sectors: {df.groupby('Sector')['Overall Score'].mean().sort_values(ascending=False).head(3).to_dict()}")
     
     return df
 
-def main(test_mode: bool = False):
+def main():
     try:
+        print("=== QUALITY MOMENTUM ANALYSIS (SECTOR Z-SCORE) ===")
+        
         # Read fundamental momentum data
         input_path = get_latest_fundamental_momentum_file()
         print(f"Reading data from: {input_path}")
         
         df = pd.read_csv(input_path)
+        print(f"Loaded {len(df)} companies")
         
-        # If in test mode, take first 10 companies
-        if test_mode:
-            df = df.head(10)
-            print(f"\nTEST MODE: Processing {len(df)} companies")
-        else:
-            print(f"\nProcessing {len(df)} companies")
-        
-        # Calculate sector-specific z-scores
-        print("\nCalculating sector-specific z-scores...")
-        df = calculate_z_scores(df)
-        
-        # Calculate sector scores using normalized metrics
-        print("Calculating sector scores...")
-        df = calculate_sector_scores(df)
-        
-        # Determine investment style based on sector-normalized scores
-        df['Style'] = df.apply(determine_style, axis=1)
-        
-        # Get sector weights for final ranking
-        sector_weights = get_sector_weights()
-        
-        # Calculate final sector score using sector weights
-        df['Sector Score'] = df.apply(lambda row: calculate_sector_score(row, row['Sector'], sector_weights), axis=1)
-        
-        # Rank within sectors
-        df['Sector Rank'] = df.groupby('Sector')['Sector Score'].rank(ascending=False)
-        
-        # Sort by sector and rank
-        df = df.sort_values(['Sector', 'Sector Rank'])
+        # Calculate scores
+        df_scored = calculate_sector_scores(df)
         
         # Save results
         output_dir = os.path.join(os.path.dirname(__file__), '..', 'csv_data_files')
         today = date.today().strftime('%Y-%m-%d')
+        output_path = os.path.join(output_dir, f"03_sector_scored_companies_{today}.csv")
         
-        # Save all companies with scores
-        output_path = os.path.join(output_dir, f"sp600_sector_scored_{today}.csv")
-        df.to_csv(output_path, index=False)
-        print(f"\nAll companies with sector scores saved to: {output_path}")
+        # Check if updating existing file
+        if os.path.exists(output_path):
+            print(f"Updating existing file: {output_path}")
+        else:
+            print(f"Creating new file: {output_path}")
         
-        # Print detailed summary by sector
-        print("\nDetailed Sector Summary:")
-        for sector in sorted(df['Sector'].unique()):
-            sector_companies = df[df['Sector'] == sector]
-            print(f"\n{sector} (Total companies: {len(sector_companies)}):")
-            print("-" * 80)
-            
-            # Print top 5 companies in each sector
-            top_5 = sector_companies.head(5)
-            for _, row in top_5.iterrows():
-                print(f"\n{row['Ticker']} (Score: {row['Sector Score']:.2f}, Rank: {row['Sector Rank']:.0f}, Style: {row['Style']})")
-                print(f"  Quality Metrics:")
-                print(f"    ROIC: {row['ROIC']:.2%}")
-                print(f"    Operating Margin: {row['Operating Margin']:.2%}")
-                print(f"    FCF: ${row['FCF']:,.0f}")
-                print(f"    Net Debt to EBITDA: {row['Net Debt to EBITDA']:.2f}")
-                print(f"  Growth Metrics:")
-                print(f"    Revenue Growth: {row['Revenue Growth']:.2%}")
-                print(f"  Momentum Metrics:")
-                print(f"    3M Return: {row['3M Return']:.2%}")
-                print(f"    6M Return: {row['6M Return']:.2%}")
-                print(f"  Scores:")
-                print(f"    Quality Score: {row['Quality Score']:.2f}")
-                print(f"    Momentum Score: {row['Momentum Score']:.2f}")
-                print(f"    Overall Score: {row['Overall Score']:.2f}")
-            
-            # Print sector statistics
-            print(f"\nSector Statistics:")
-            print(f"  Average Score: {sector_companies['Sector Score'].mean():.2f}")
-            print(f"  Median Score: {sector_companies['Sector Score'].median():.2f}")
-            print(f"  Score Range: {sector_companies['Sector Score'].min():.2f} to {sector_companies['Sector Score'].max():.2f}")
+        df_scored.to_csv(output_path, index=False)
+        print(f"\nResults saved to: {output_path}")
+        
+        # Display summary
+        print("\n" + "="*80)
+        print("ANALYSIS SUMMARY")
+        print("="*80)
+        print(f"Total companies analyzed: {len(df_scored)}")
+        print(f"Average Overall Score: {df_scored['Overall Score'].mean():.2f}")
+        
+        print("\nTop 10 Companies:")
+        print("-" * 80)
+        
+        for _, row in df_scored.head(10).iterrows():
+            print(f"{row['Ticker']:<8} {row['Sector']:<20} {row['Style']:<8} {row['Overall Score']:.2f}")
+        
+        print("\nStyle Distribution:")
+        style_counts = df_scored['Style'].value_counts()
+        for style, count in style_counts.items():
+            print(f"  {style}: {count} companies ({count/len(df_scored)*100:.1f}%)")
+        
+        return df_scored
         
     except Exception as e:
         print(f"Error occurred: {str(e)}")
         raise
 
 if __name__ == "__main__":
-    main(test_mode=False)  # Run full analysis 
+    result = main() 

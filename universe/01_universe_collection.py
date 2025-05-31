@@ -1,6 +1,6 @@
 import pandas as pd
 import requests
-from datetime import datetime
+from datetime import datetime, date
 import os
 
 def load_sp600_from_wikipedia(save_csv: bool = True) -> pd.DataFrame:
@@ -28,14 +28,13 @@ def load_sp600_from_wikipedia(save_csv: bool = True) -> pd.DataFrame:
     # Select columns
     df = df[keep_cols]
 
-    # Save the CSV directly to csv_data_files
-    if save_csv:
-        today = datetime.today().strftime("%Y-%m-%d")
-        output_dir = os.path.join(os.path.dirname(__file__), '..', 'csv_data_files')
-        os.makedirs(output_dir, exist_ok=True)
-        output_path = os.path.join(output_dir, f"sp600_holdings_{today}.csv")
-        df.to_csv(output_path, index=False)
-        print(f"\nSaved S&P 600 holdings to: {output_path}")
+    # Save to CSV with proper naming
+    output_dir = os.path.join(os.path.dirname(__file__), '..', 'csv_data_files')
+    os.makedirs(output_dir, exist_ok=True)
+    today = date.today().strftime('%Y-%m-%d')
+    output_path = os.path.join(output_dir, f"01_universe_sp600_companies_{today}.csv")
+    df.to_csv(output_path, index=False)
+    print(f"\nSaved S&P 600 holdings to: {output_path}")
 
     return df
 

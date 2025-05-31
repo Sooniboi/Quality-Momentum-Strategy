@@ -887,7 +887,7 @@ def main():
         }
         
         macro_df = pd.DataFrame([macro_summary])
-        macro_path = os.path.join(output_dir, f"macro_analysis_{today}.csv")
+        macro_path = os.path.join(output_dir, f"05_macro_economic_analysis_{today}.csv")
         macro_df.to_csv(macro_path, index=False)
         print(f"\nMacro analysis saved to: {macro_path}")
         
