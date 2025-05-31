@@ -6,6 +6,9 @@ import requests
 from typing import Dict, List, Tuple
 import time
 from dotenv import load_dotenv
+import json
+import re
+from bs4 import BeautifulSoup
 
 load_dotenv()
 API_KEY = os.getenv("FMP_API_KEY")
@@ -826,87 +829,423 @@ def generate_macro_report(treasury_rates: Dict, economic_indicators: Dict,
         else:
             print("  📊 BALANCED APPROACH: Maintain current allocations with slight defensive bias")
 
+def scrape_fed_rate_probabilities() -> Dict:
+    """Scrape Fed rate cut/hike probabilities from CME FedWatch Tool."""
+    print("🎯 Scraping Fed rate probabilities from CME FedWatch...")
+    
+    fed_data = {
+        'last_updated': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+        'next_meeting': None,
+        'rate_probabilities': {},
+        'current_rate_range': '5.25-5.50',
+        'source': 'CME_FedWatch',
+        'confidence': 'medium'
+    }
+    
+    try:
+        # CME FedWatch Tool URL
+        url = "https://www.cmegroup.com/markets/interest-rates/cme-fedwatch-tool.html"
+        
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.5',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Connection': 'keep-alive'
+        }
+        
+        response = requests.get(url, headers=headers, timeout=10)
+        
+        if response.status_code == 200:
+            # Parse the page for Fed rate probabilities
+            soup = BeautifulSoup(response.content, 'html.parser')
+            
+            # Look for the data in JSON format (CME often embeds data)
+            script_tags = soup.find_all('script')
+            for script in script_tags:
+                if script.string and 'fedwatch' in script.string.lower():
+                    try:
+                        # Extract JSON data from script
+                        json_start = script.string.find('{')
+                        json_end = script.string.rfind('}') + 1
+                        if json_start != -1 and json_end != -1:
+                            json_str = script.string[json_start:json_end]
+                            data = json.loads(json_str)
+                            # Parse Fed rate probabilities from data
+                            fed_data = parse_fedwatch_data(data)
+                            break
+                    except:
+                        continue
+            
+            # Fallback: Parse HTML tables for rate probabilities
+            if not fed_data.get('rate_probabilities'):
+                fed_data = parse_fedwatch_html(soup)
+                
+        else:
+            print(f"❌ CME FedWatch scraping failed: {response.status_code}")
+            fed_data = get_fallback_fed_probabilities()
+            
+    except Exception as e:
+        print(f"❌ Fed rate scraping error: {str(e)}")
+        fed_data = get_fallback_fed_probabilities()
+    
+    # Validate and clean data
+    fed_data = validate_fed_probabilities(fed_data)
+    
+    print(f"✅ Fed rate probabilities updated: {fed_data['confidence']} confidence")
+    return fed_data
+
+def parse_fedwatch_data(data: Dict) -> Dict:
+    """Parse JSON data from CME FedWatch."""
+    fed_data = {
+        'last_updated': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+        'next_meeting': None,
+        'rate_probabilities': {},
+        'current_rate_range': '5.25-5.50',
+        'source': 'CME_FedWatch_JSON',
+        'confidence': 'high'
+    }
+    
+    try:
+        # CME data structure varies, adapt as needed
+        if 'meetings' in data:
+            next_meeting = data['meetings'][0] if data['meetings'] else None
+            if next_meeting:
+                fed_data['next_meeting'] = next_meeting.get('date')
+                
+                # Parse probabilities for rate changes
+                probabilities = next_meeting.get('probabilities', {})
+                fed_data['rate_probabilities'] = {
+                    'rate_cut_25bps': probabilities.get('cut_25', 0.0),
+                    'rate_cut_50bps': probabilities.get('cut_50', 0.0),
+                    'rate_hold': probabilities.get('hold', 0.0),
+                    'rate_hike_25bps': probabilities.get('hike_25', 0.0),
+                    'rate_hike_50bps': probabilities.get('hike_50', 0.0)
+                }
+                
+    except Exception as e:
+        print(f"Error parsing FedWatch JSON: {e}")
+        fed_data['confidence'] = 'low'
+    
+    return fed_data
+
+def parse_fedwatch_html(soup) -> Dict:
+    """Parse HTML tables from CME FedWatch as fallback."""
+    fed_data = {
+        'last_updated': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+        'next_meeting': None,
+        'rate_probabilities': {},
+        'current_rate_range': '5.25-5.50',
+        'source': 'CME_FedWatch_HTML',
+        'confidence': 'medium'
+    }
+    
+    try:
+        # Look for probability tables
+        tables = soup.find_all('table')
+        for table in tables:
+            # Find rate probability data in table headers/cells
+            rows = table.find_all('tr')
+            for row in rows:
+                cells = row.find_all(['td', 'th'])
+                for cell in cells:
+                    text = cell.get_text().strip()
+                    # Look for percentage values that might be probabilities
+                    if '%' in text and any(word in text.lower() for word in ['cut', 'hold', 'hike']):
+                        # Extract and categorize probabilities
+                        percentage = re.search(r'(\d+\.?\d*)%', text)
+                        if percentage:
+                            prob_value = float(percentage.group(1)) / 100
+                            if 'cut' in text.lower():
+                                fed_data['rate_probabilities']['rate_cut'] = prob_value
+                            elif 'hold' in text.lower():
+                                fed_data['rate_probabilities']['rate_hold'] = prob_value
+                            elif 'hike' in text.lower():
+                                fed_data['rate_probabilities']['rate_hike'] = prob_value
+                                
+    except Exception as e:
+        print(f"Error parsing FedWatch HTML: {e}")
+        fed_data['confidence'] = 'low'
+    
+    return fed_data
+
+def get_fallback_fed_probabilities() -> Dict:
+    """Provide fallback Fed rate probabilities when scraping fails."""
+    print("📊 Using fallback Fed rate probabilities...")
+    
+    # Current market consensus (update manually as needed)
+    today = datetime.now()
+    next_meeting_dates = [
+        '2025-01-29', '2025-03-19', '2025-05-01', '2025-06-11',
+        '2025-07-30', '2025-09-17', '2025-11-05', '2025-12-17'
+    ]
+    
+    next_meeting = None
+    for meeting_date in next_meeting_dates:
+        if datetime.strptime(meeting_date, '%Y-%m-%d') > today:
+            next_meeting = meeting_date
+            break
+    
+    # Conservative fallback probabilities (update based on recent market consensus)
+    return {
+        'last_updated': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+        'next_meeting': next_meeting,
+        'rate_probabilities': {
+            'rate_cut_25bps': 0.15,    # 15% chance of 25bp cut
+            'rate_cut_50bps': 0.02,    # 2% chance of 50bp cut  
+            'rate_hold': 0.78,         # 78% chance of hold
+            'rate_hike_25bps': 0.05,   # 5% chance of 25bp hike
+            'rate_hike_50bps': 0.00    # 0% chance of 50bp hike
+        },
+        'current_rate_range': '5.25-5.50',
+        'source': 'Manual_Fallback',
+        'confidence': 'low'
+    }
+
+def validate_fed_probabilities(fed_data: Dict) -> Dict:
+    """Validate and normalize Fed rate probabilities."""
+    try:
+        probabilities = fed_data.get('rate_probabilities', {})
+        
+        # Ensure all probabilities are between 0 and 1
+        for key, value in probabilities.items():
+            if value > 1.0:
+                probabilities[key] = value / 100  # Convert percentage to decimal
+            if value < 0:
+                probabilities[key] = 0.0
+                
+        # Normalize probabilities to sum to 1.0
+        total_prob = sum(probabilities.values())
+        if total_prob > 0:
+            for key in probabilities:
+                probabilities[key] = probabilities[key] / total_prob
+        
+        # Calculate aggregate probabilities for easier use
+        fed_data['aggregate_probabilities'] = {
+            'rate_cut_total': probabilities.get('rate_cut_25bps', 0) + probabilities.get('rate_cut_50bps', 0),
+            'rate_hold': probabilities.get('rate_hold', 0),
+            'rate_hike_total': probabilities.get('rate_hike_25bps', 0) + probabilities.get('rate_hike_50bps', 0)
+        }
+        
+        # Set confidence based on data completeness
+        if fed_data['source'] == 'CME_FedWatch_JSON':
+            fed_data['confidence'] = 'high'
+        elif fed_data['source'] == 'CME_FedWatch_HTML':
+            fed_data['confidence'] = 'medium'
+        else:
+            fed_data['confidence'] = 'low'
+            
+    except Exception as e:
+        print(f"Error validating Fed probabilities: {e}")
+        fed_data['confidence'] = 'low'
+    
+    return fed_data
+
+def analyze_fed_proximity_impact(fed_data: Dict, days_to_meeting: int) -> Dict:
+    """Analyze market impact based on Fed meeting proximity."""
+    print(f"📅 Analyzing Fed proximity impact: {days_to_meeting} days to meeting")
+    
+    analysis = {
+        'days_to_meeting': days_to_meeting,
+        'volatility_expectation': 'normal',
+        'sector_rotation_probability': 'low',
+        'risk_management_recommendation': 'normal',
+        'tactical_adjustments': []
+    }
+    
+    # Get rate probabilities
+    rate_cut_prob = fed_data.get('aggregate_probabilities', {}).get('rate_cut_total', 0)
+    rate_hike_prob = fed_data.get('aggregate_probabilities', {}).get('rate_hike_total', 0)
+    
+    if days_to_meeting <= 2:
+        analysis['volatility_expectation'] = 'very_high'
+        analysis['risk_management_recommendation'] = 'defensive'
+        analysis['tactical_adjustments'].extend([
+            'reduce_position_sizes_by_10_percent',
+            'increase_cash_buffer',
+            'hedge_with_VIX_instruments'
+        ])
+        
+    elif days_to_meeting <= 7:
+        analysis['volatility_expectation'] = 'high'
+        analysis['sector_rotation_probability'] = 'high'
+        
+        if rate_cut_prob > 0.6:  # > 60% chance of cut
+            analysis['tactical_adjustments'].extend([
+                'overweight_technology_growth',
+                'overweight_real_estate',
+                'reduce_financials_exposure'
+            ])
+        elif rate_hike_prob > 0.3:  # > 30% chance of hike  
+            analysis['tactical_adjustments'].extend([
+                'overweight_financials',
+                'reduce_growth_tech_exposure',
+                'increase_defensive_sectors'
+            ])
+        else:  # Uncertain outcome
+            analysis['tactical_adjustments'].extend([
+                'favor_quality_stocks',
+                'reduce_speculative_positions',
+                'maintain_sector_balance'
+            ])
+            
+    elif days_to_meeting <= 14:
+        analysis['volatility_expectation'] = 'elevated'
+        analysis['sector_rotation_probability'] = 'medium'
+        analysis['tactical_adjustments'].append('monitor_rate_sensitive_sectors')
+    
+    return analysis
+
 def main():
     try:
-        print("Starting comprehensive macro economic analysis...")
+        print("Starting Macro Economic Analysis...")
+        start_time = time.time()
         
-        # Collect macro data
+        # Collect macro economic data
+        print("\n=== STEP 1: Data Collection ===")
         treasury_rates = get_treasury_rates()
         economic_indicators = get_economic_indicators()
         recession_indicators = get_recession_indicators()
         
-        # Analyze macro conditions with basis points precision
+        # NEW: Scrape Fed rate probabilities
+        print("\n=== STEP 2: Fed Rate Analysis ===")
+        fed_data = scrape_fed_rate_probabilities()
+        
+        # Calculate Fed meeting proximity if next meeting exists
+        fed_proximity_analysis = None
+        if fed_data.get('next_meeting'):
+            try:
+                next_meeting_date = datetime.strptime(fed_data['next_meeting'], '%Y-%m-%d').date()
+                days_to_meeting = (next_meeting_date - datetime.now().date()).days
+                fed_proximity_analysis = analyze_fed_proximity_impact(fed_data, days_to_meeting)
+            except:
+                fed_proximity_analysis = None
+        
+        print("\n=== STEP 3: Economic Analysis ===")
+        # Calculate yield curve metrics
         yield_curve = calculate_yield_curve_metrics(treasury_rates)
+        
+        # Analyze recession probability
+        recession_analysis = calculate_recession_probability(
+            treasury_rates, recession_indicators, economic_indicators
+        )
+        
+        # Classify interest rate environment
         rate_environment = classify_interest_rate_environment(treasury_rates)
+        
+        # Classify market regime
         market_regime = classify_market_regime(economic_indicators, yield_curve)
         
-        # Calculate recession probability
-        recession_analysis = calculate_recession_probability(treasury_rates, recession_indicators, economic_indicators)
+        print("\n=== STEP 4: Investment Recommendations ===")
+        # Generate sector recommendations
+        sector_recs = generate_sector_recommendations(
+            rate_environment, market_regime, yield_curve, recession_analysis
+        )
         
-        # Generate recommendations with recession analysis and Fed data
-        sector_recommendations = generate_sector_recommendations(rate_environment, market_regime, yield_curve, recession_analysis)
-        style_recommendations = generate_style_recommendations(rate_environment, market_regime, recession_analysis)
-        risk_adjustments = generate_risk_adjustments(market_regime, economic_indicators, recession_analysis)
+        # Generate style recommendations
+        style_recs = generate_style_recommendations(
+            rate_environment, market_regime, recession_analysis
+        )
         
-        # Generate comprehensive report
+        # Generate risk adjustments
+        risk_adj = generate_risk_adjustments(
+            market_regime, economic_indicators, recession_analysis
+        )
+        
+        print("\n=== STEP 5: Report Generation ===")
+        # Generate comprehensive report (updated with Fed data)
         generate_macro_report(
             treasury_rates, economic_indicators, yield_curve, 
             rate_environment, market_regime, recession_analysis,
-            sector_recommendations, style_recommendations, risk_adjustments,
-            None, None
+            sector_recs, style_recs, risk_adj,
+            fed_data, fed_proximity_analysis
         )
         
-        # Save macro analysis results with enhanced precision
-        output_dir = os.path.join(os.path.dirname(__file__), '..', 'csv_data_files')
-        today = date.today().strftime('%Y-%m-%d')
+        # Save comprehensive data with Fed integration
+        timestamp = datetime.now().strftime('%Y-%m-%d')
         
-        macro_summary = {
-            'analysis_date': today,
-            'fed_funds_rate': rate_environment.get('fed_funds_rate', 0),
-            'ten_year_rate': treasury_rates.get('10_year', 0),
-            'curve_2s10s_bps': yield_curve.get('curve_2s10s_bps', 0),
-            'fed_10y_spread_bps': rate_environment.get('fed_10y_spread_bps', 0),
-            'curve_shape': yield_curve.get('curve_shape', 'N/A'),
-            'vix': economic_indicators.get('vix', 0),
-            'rate_environment': rate_environment.get('rate_environment', 'N/A'),
-            'market_regime': market_regime.get('overall_regime', 'N/A'),
-            'risk_multiplier': risk_adjustments.get('risk_multiplier', 1.0),
-            'recession_risk': yield_curve.get('recession_risk', 'Low'),
-            'recession_probability': recession_analysis.get('recession_probability', 0),
-            'recession_confidence': recession_analysis.get('confidence', 'Low'),
-            'recession_time_horizon': recession_analysis.get('time_horizon', 'N/A'),
-            'key_risk_factors': '; '.join(recession_analysis.get('key_risks', [])),
-            'fed_bias': rate_environment.get('fed_bias', 'Unknown'),
-            'cut_probability': 0,
-            'hold_probability': 0,
-            'hike_probability': 0,
-            'days_to_fed_meeting': 0,
-            'next_fed_meeting': 'Unknown',
-            'fed_proximity_effect': 'Neutral',
-            'tactical_recommendation': 'Standard positioning'
-        }
-        
-        macro_df = pd.DataFrame([macro_summary])
-        macro_path = os.path.join(output_dir, f"05_macro_economic_analysis_{today}.csv")
-        macro_df.to_csv(macro_path, index=False)
-        print(f"\nMacro analysis saved to: {macro_path}")
-        
-        return {
-            'sector_recommendations': sector_recommendations,
-            'style_recommendations': style_recommendations,
-            'risk_adjustments': risk_adjustments,
+        # Create comprehensive macro analysis dataset
+        macro_data = {
+            'analysis_date': timestamp,
             'treasury_rates': treasury_rates,
-            'market_regime': market_regime,
-            'rate_environment': rate_environment,
-            'yield_curve': yield_curve,
+            'economic_indicators': economic_indicators,
+            'recession_indicators': recession_indicators,
+            'fed_rate_data': fed_data,
+            'fed_proximity_analysis': fed_proximity_analysis,
+            'yield_curve_analysis': yield_curve,
             'recession_analysis': recession_analysis,
-            'fed_data': None,
-            'fed_proximity_analysis': None
+            'rate_environment': rate_environment,
+            'market_regime': market_regime,
+            'sector_recommendations': sector_recs,
+            'style_recommendations': style_recs,
+            'risk_adjustments': risk_adj
         }
+        
+        # Save as CSV for easy integration
+        macro_df = pd.DataFrame([{
+            'Date': timestamp,
+            'VIX': economic_indicators.get('vix', 0),
+            'USD_Index': economic_indicators.get('usd_index', 0),
+            'Gold_Price': economic_indicators.get('gold_price', 0),
+            'Oil_Price': economic_indicators.get('oil_price', 0),
+            '10Y_Treasury': treasury_rates.get('10_year', 0),
+            '2Y_Treasury': treasury_rates.get('2_year', 0),
+            'Yield_Curve_2s10s': yield_curve.get('curve_2s10s_bps', 0),
+            'Recession_Probability': recession_analysis.get('recession_probability', 0),
+            'Market_Regime': market_regime.get('overall_regime', 'N/A'),
+            'Fed_Rate_Cut_Prob': fed_data.get('aggregate_probabilities', {}).get('rate_cut_total', 0),
+            'Fed_Rate_Hold_Prob': fed_data.get('aggregate_probabilities', {}).get('rate_hold', 0),
+            'Fed_Rate_Hike_Prob': fed_data.get('aggregate_probabilities', {}).get('rate_hike_total', 0),
+            'Days_To_Fed_Meeting': fed_proximity_analysis.get('days_to_meeting', 999) if fed_proximity_analysis else 999,
+            'Fed_Data_Confidence': fed_data.get('confidence', 'low'),
+            'Recommended_Tech_Weight': sector_recs.get('Technology', {}).get('weight_adjustment', 1.0),
+            'Recommended_Healthcare_Weight': sector_recs.get('Healthcare', {}).get('weight_adjustment', 1.0),
+            'Recommended_Financials_Weight': sector_recs.get('Financials', {}).get('weight_adjustment', 1.0),
+            'Risk_Adjustment_Factor': risk_adj.get('risk_multiplier', 1.0)
+        }])
+        
+        # Save macro analysis data
+        macro_file = f"05_macro_economic_analysis_{timestamp}.csv"
+        macro_df.to_csv(macro_file, index=False)
+        print(f"💾 Macro analysis saved to {macro_file}")
+        
+        # Save detailed Fed data separately for event-driven system
+        fed_file = f"fed_rate_data_{timestamp}.json"
+        with open(fed_file, 'w') as f:
+            json.dump(macro_data['fed_rate_data'], f, indent=2)
+        print(f"🎯 Fed rate data saved to {fed_file}")
+        
+        # Performance summary
+        end_time = time.time()
+        duration = end_time - start_time
+        print(f"\n✅ Macro Economic Analysis completed in {duration:.1f} seconds")
+        
+        # Event-driven trigger check
+        if fed_proximity_analysis and fed_proximity_analysis.get('days_to_meeting', 999) <= 7:
+            print(f"\n🚨 EVENT TRIGGER: Fed meeting in {fed_proximity_analysis['days_to_meeting']} days!")
+            print(f"📊 Recommended actions: {', '.join(fed_proximity_analysis.get('tactical_adjustments', []))}")
+            
+            # Save trigger file for event-driven system
+            trigger_data = {
+                'trigger_type': 'fed_meeting_proximity',
+                'urgency': 'high' if fed_proximity_analysis['days_to_meeting'] <= 2 else 'medium',
+                'days_to_meeting': fed_proximity_analysis['days_to_meeting'],
+                'recommended_actions': fed_proximity_analysis.get('tactical_adjustments', []),
+                'rate_cut_probability': fed_data.get('aggregate_probabilities', {}).get('rate_cut_total', 0),
+                'timestamp': datetime.now().isoformat()
+            }
+            
+            with open('event_trigger.json', 'w') as f:
+                json.dump(trigger_data, f, indent=2)
+            print("🎯 Event trigger saved for automatic reoptimization")
+        
+        return True
         
     except Exception as e:
-        print(f"Error occurred: {str(e)}")
-        raise
+        print(f"❌ Error in macro economic analysis: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return False
 
 if __name__ == "__main__":
     main() 
