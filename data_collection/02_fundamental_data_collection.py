@@ -21,7 +21,7 @@ RATE_LIMIT_DELAY = 0.1  # Delay between calls in seconds
 def get_latest_sp600_file() -> str:
     """Get the latest S&P 600 holdings CSV file."""
     try:
-        pattern = os.path.join(os.path.dirname(__file__), '..', 'csv_data_files', 'sp600_holdings_*.csv')
+        pattern = os.path.join(os.path.dirname(__file__), '..', 'csv_data_files', '01_universe_sp600_companies_*.csv')
         files = glob.glob(pattern)
         if not files:
             raise FileNotFoundError("No S&P 600 holdings CSV files found in csv_data_files directory.")
@@ -277,23 +277,20 @@ def pull_sp600_fundamental_and_momentum(test_mode: bool = False, test_ticker_cou
         df = pd.DataFrame(all_results)
         output_dir = os.path.join(os.path.dirname(__file__), '..', 'csv_data_files')
         os.makedirs(output_dir, exist_ok=True)
-        output_path = os.path.join(output_dir, "sp600_fundamental_momentum.csv")
         
-        # If file exists, update it; otherwise create new
+        # Add date stamp for consistency
+        today = date.today().strftime('%Y-%m-%d')
+        output_path = os.path.join(output_dir, f"02_fundamentals_with_momentum_{today}.csv")
+        
+        # Check if file exists and update it, otherwise create new
         if os.path.exists(output_path):
-            existing_df = pd.read_csv(output_path)
-            # Update existing records and add new ones
-            for _, row in df.iterrows():
-                mask = existing_df['Ticker'] == row['Ticker']
-                if mask.any():
-                    existing_df.loc[mask] = row
-                else:
-                    existing_df = pd.concat([existing_df, pd.DataFrame([row])], ignore_index=True)
-            existing_df.to_csv(output_path, index=False)
-            print(f"\nData pull complete. Updated existing file: {output_path}")
+            print(f"Updating existing file: {output_path}")
         else:
-            df.to_csv(output_path, index=False)
-            print(f"\nData pull complete. Created new file: {output_path}")
+            print(f"Creating new file: {output_path}")
+        
+        # Always overwrite with latest data
+        df.to_csv(output_path, index=False)
+        print(f"\nData pull complete. File: {output_path}")
             
     except Exception as e:
         print(f"Error occurred: {str(e)}")

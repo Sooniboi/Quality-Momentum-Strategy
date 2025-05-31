@@ -6,12 +6,12 @@ from typing import Dict, List
 
 def get_latest_sector_scored_file() -> str:
     """Get the latest sector scored CSV file."""
-    pattern = os.path.join(os.path.dirname(__file__), '..', 'csv_data_files', 'sp600_sector_scored_*.csv')
+    pattern = os.path.join(os.path.dirname(__file__), '..', 'csv_data_files', '03_sector_scored_companies_*.csv')
     import glob
     files = glob.glob(pattern)
     if not files:
         raise FileNotFoundError("No sector scored CSV file found.")
-    return max(files)  # Get the most recent file
+    return max(files, key=os.path.getctime)  # Get the most recent file
 
 def apply_quality_filters(df: pd.DataFrame) -> pd.DataFrame:
     """Apply minimum quality filters to remove weak companies."""
@@ -144,10 +144,17 @@ def main():
         # Sort by sector and overall score
         portfolio = portfolio.sort_values(['Sector', 'Overall Score'], ascending=[True, False])
         
-        # Save portfolio
+        # Save the selected portfolio
         output_dir = os.path.join(os.path.dirname(__file__), '..', 'csv_data_files')
+        os.makedirs(output_dir, exist_ok=True)
         today = date.today().strftime('%Y-%m-%d')
-        output_path = os.path.join(output_dir, f"selected_portfolio_{today}.csv")
+        output_path = os.path.join(output_dir, f"04_final_portfolio_selection_{today}.csv")
+        
+        # Check if updating existing file
+        if os.path.exists(output_path):
+            print(f"Updating existing portfolio: {output_path}")
+        else:
+            print(f"Creating new portfolio: {output_path}")
         
         # Select key columns for output
         output_columns = [
