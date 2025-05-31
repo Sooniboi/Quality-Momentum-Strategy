@@ -39,13 +39,18 @@ async def scrape_fed_data():
                 print("Inflation element not found")
                 inflation_text = "Not found"
             
-            # Get Unemployment Rate from card structure
-            unemployment_element = await page.query_selector('div.mb75.homepageBox >> text=Unemployment Rate')
+            # Get Unemployment Rate with exact class combination (same structure as PCE)
+            unemployment_element = await page.query_selector('div.homepageBox:has-text("Unemployment Rate") span._bold_1sxcz_1._smaller_1sxcz_11')
             if unemployment_element:
-                parent_card = await unemployment_element.evaluate('element => element.closest(".card")')
-                if parent_card:
-                    unemployment_text = await parent_card.text_content()
-                    print(f"Found Unemployment text: {unemployment_text}")
+                unemployment_rate = await unemployment_element.text_content()
+                # Get the date which is in the next span
+                date_element = await page.query_selector('div.homepageBox:has-text("Unemployment Rate") span._date_1sxcz_17')
+                if date_element:
+                    date_text = await date_element.text_content()
+                    unemployment_text = f"{unemployment_rate} ({date_text})"
+                else:
+                    unemployment_text = unemployment_rate
+                print(f"Found Unemployment: {unemployment_text}")
             else:
                 print("Unemployment element not found")
                 unemployment_text = "Not found"
