@@ -1,67 +1,85 @@
 import asyncio
 from playwright.async_api import async_playwright
 import pandas as pd
-import time
+from datetime import datetime
 
-async def scrape_fedwatch_table():
+async def scrape_fed_data():
     try:
         print("Starting Playwright...")
         async with async_playwright() as p:
-            browser = await p.chromium.launch(
-                headless=True,
-                args=['--disable-http2', '--no-sandbox']
-            )
+            browser = await p.chromium.launch(headless=True)
+            page = await browser.new_page()
             
-            context = await browser.new_context(
-                viewport={'width': 1920, 'height': 1080},
-                user_agent='Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
-            )
+            print("Navigating to Federal Reserve website...")
+            await page.goto("https://www.federalreserve.gov")
+            await page.wait_for_load_state('networkidle')
             
-            page = await context.new_page()
+            # Get Fed Funds Target Range using exact class name
+            fed_funds_element = await page.query_selector('p._bold_1sxcz_1')
+            if fed_funds_element:
+                fed_funds_rate = await fed_funds_element.text_content()
+                print(f"Found Fed Funds Rate: {fed_funds_rate}")
+            else:
+                print("Fed Funds Rate element not found")
+                fed_funds_rate = "Not found"
             
-            print("Navigating to webpage...")
-            await page.goto("https://www.cmegroup.com/markets/interest-rates/cme-fedwatch-tool.html", timeout=30000)
+            # Get PCE Inflation from card structure
+            inflation_element = await page.query_selector('div.mb75.homepageBox >> text=Inflation (PCE)')
+            if inflation_element:
+                parent_card = await inflation_element.evaluate('element => element.closest(".card")')
+                if parent_card:
+                    inflation_text = await parent_card.text_content()
+                    print(f"Found Inflation text: {inflation_text}")
+            else:
+                print("Inflation element not found")
+                inflation_text = "Not found"
             
-            print("Waiting for page to load...")
-            await page.wait_for_timeout(10000)
+            # Get Unemployment Rate from card structure
+            unemployment_element = await page.query_selector('div.mb75.homepageBox >> text=Unemployment Rate')
+            if unemployment_element:
+                parent_card = await unemployment_element.evaluate('element => element.closest(".card")')
+                if parent_card:
+                    unemployment_text = await parent_card.text_content()
+                    print(f"Found Unemployment text: {unemployment_text}")
+            else:
+                print("Unemployment element not found")
+                unemployment_text = "Not found"
             
-            # Debug: Print page content
-            content = await page.content()
-            print("Page HTML content:")
-            print(content[:1000])  # Print first 1000 characters for debugging
-            
-            print("\nLooking for target rates and probabilities...")
-            
-            # Find all elements containing the target rates (425-450)
-            rate_elements = await page.query_selector_all('text="425-450"')
-            print(f"Found {len(rate_elements)} rate elements")
-            
-            # Find all elements containing percentage values
-            percentage_elements = await page.query_selector_all('text=/\\d+\\.\\d+%/')
-            print(f"Found {len(percentage_elements)} percentage elements")
-            
-            # Extract and print all found values
-            print("\nFound values:")
-            for element in rate_elements:
-                text = await element.text_content()
-                print(f"Rate: {text}")
-            
-            for element in percentage_elements:
-                text = await element.text_content()
-                print(f"Percentage: {text}")
-            
-            # Take a screenshot for debugging
+            # Take screenshot for debugging
             await page.screenshot(path='debug_screenshot.png')
             print("\nSaved debug screenshot to debug_screenshot.png")
             
-            # Close browser
+            # Print the HTML structure around the elements for debugging
+            html_content = await page.content()
+            print("\nRelevant HTML structure:")
+            print(html_content[:1000])
+            
+            # Create DataFrame
+            data = {
+                'Metric': ['Fed Funds Target Range', 'PCE Inflation', 'Unemployment Rate'],
+                'Value': [fed_funds_rate, inflation_text, unemployment_text],
+                'Date Scraped': [datetime.now()] * 3
+            }
+            df = pd.DataFrame(data)
+            
+            print("\nScraped Data:")
+            print("=" * 50)
+            print(df)
+            
+            # Save to CSV
+            filename = f'fed_data_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv'
+            df.to_csv(filename, index=False)
+            print(f"\nData saved to {filename}")
+            
             await browser.close()
+            return df
             
     except Exception as e:
         print(f"Error occurred: {str(e)}")
         print(f"Error type: {type(e)}")
+        print(f"Error location: {e.__traceback__.tb_lineno}")
         return None
 
 if __name__ == "__main__":
-    print("Starting scraper...")
-    asyncio.run(scrape_fedwatch_table())
+    print("Starting Fed data scraper...")
+    asyncio.run(scrape_fed_data())
