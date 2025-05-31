@@ -1,0 +1,8 @@
+1. OPEN Laptop
+2. git pull
+3. make changes
+4. git add .
+5. git status (to verify the files were added - green = tracked; red = NOT tracked)
+5. git commit -m "describe the changes made"
+6. git push
+7. CLOSE Laptop
