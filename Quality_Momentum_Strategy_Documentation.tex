@@ -1,0 +1,784 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{tikz}
+\usepackage{float}
+\usepackage{longtable}
+
+\title{\textbf{Quality Momentum Strategy: A Systematic Approach to Small-Cap Equity Investing}}
+\author{Quantitative Investment Research}
+\date{\today}
+
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{Quality Momentum Strategy Documentation}
+\lhead{\today}
+\cfoot{\thepage}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This document presents a comprehensive overview of the Quality Momentum Strategy, a systematic approach to small-cap equity investing that combines fundamental quality metrics, momentum indicators, and macroeconomic analysis. The strategy employs sector-relative scoring, style classification, and dynamic risk management to construct diversified portfolios. This documentation covers the current implementation, theoretical foundations, operational procedures, potential enhancements, and future development roadmap.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+\section{Executive Summary}
+
+The Quality Momentum Strategy represents a multi-factor quantitative approach to small-cap equity investing, designed to systematically identify high-quality companies exhibiting positive momentum characteristics while maintaining proper risk controls and macroeconomic awareness. The strategy operates on the S\&P 600 universe and employs sophisticated scoring methodologies to construct concentrated portfolios of approximately 50 securities.
+
+\section{Current System Implementation}
+
+\subsection{Universe Definition and Selection}
+
+\subsubsection{Implementation}
+\begin{itemize}
+    \item \textbf{Universe}: S\&P 600 Small Cap Index ($\sim$600 securities)
+    \item \textbf{Data Source}: Wikipedia web scraping with daily updates
+    \item \textbf{Coverage}: All GICS sectors with complete fundamental data
+\end{itemize}
+
+\subsubsection{Theoretical Foundation}
+The selection of small-cap equities is grounded in the \textbf{Size Effect} theory (Banz, 1981), which demonstrates that smaller companies historically generate superior risk-adjusted returns compared to large-cap counterparts. The S\&P 600 provides:
+
+\begin{equation}
+E[R_{small}] > E[R_{large}] + \beta_{size} \cdot Risk Premium
+\end{equation}
+
+Where $\beta_{size}$ represents the size factor loading and captures the additional return premium for bearing liquidity and information asymmetry risks inherent in smaller companies.
+
+\subsection{Data Collection and Processing}
+
+\subsubsection{Implementation}
+\begin{itemize}
+    \item \textbf{Fundamental Metrics}: ROIC, Operating Margin, Revenue Growth, FCF, Net Debt/EBITDA
+    \item \textbf{Momentum Indicators}: 3-month and 6-month price returns
+    \item \textbf{Market Data}: Market capitalization, trading volumes, price histories
+    \item \textbf{API Integration}: Financial Modeling Prep with rate limiting and error handling
+\end{itemize}
+
+\subsubsection{Theoretical Foundation}
+The data collection framework is based on \textbf{Multi-Factor Asset Pricing Theory} (Fama-French, 1993), which posits that security returns can be explained by exposure to systematic risk factors:
+
+\begin{equation}
+R_i = \alpha_i + \beta_1 F_1 + \beta_2 F_2 + \ldots + \beta_k F_k + \epsilon_i
+\end{equation}
+
+Where $F_1, F_2, \ldots, F_k$ represent fundamental and momentum factors that drive cross-sectional return variation.
+
+\subsection{Quality-Momentum Scoring Engine}
+
+\subsubsection{Implementation}
+The scoring system employs sector-relative z-score normalization:
+
+\begin{itemize}
+    \item \textbf{Sector Z-Scores}: $Z_{i,j} = \frac{X_{i,j} - \mu_{sector,j}}{\sigma_{sector,j}}$
+    \item \textbf{Sector-Specific Weights}: Technology (Growth 25\%), Healthcare (Operating Margin 20\%)
+    \item \textbf{Composite Scores}: Quality Score, Momentum Score, Overall Score
+\end{itemize}
+
+\subsubsection{Theoretical Foundation and Detailed Formulations}
+This approach is grounded in \textbf{Quality Factor Theory} (Asness et al., 2014) and \textbf{Momentum Theory} (Jegadeesh \& Titman, 1993):
+
+\textbf{Quality Factor}:
+\begin{equation}
+Quality_i = w_1 \cdot ROIC_i + w_2 \cdot Margin_i + w_3 \cdot Growth_i + w_4 \cdot Leverage_i
+\end{equation}
+
+Where the sector-specific weights are:
+\begin{align}
+w_{tech} &= [0.20, 0.15, 0.25, 0.10] \text{ (Technology sector)} \\
+w_{health} &= [0.15, 0.20, 0.20, 0.10] \text{ (Healthcare sector)} \\
+w_{finance} &= [0.25, 0.15, 0.15, 0.15] \text{ (Financial Services)}
+\end{align}
+
+\textbf{Momentum Factor}:
+\begin{equation}
+Momentum_i = w_1 \cdot R_{3M,i} + w_2 \cdot R_{6M,i}
+\end{equation}
+
+Where $R_{3M,i} = \frac{P_{t} - P_{t-63}}{P_{t-63}}$ and $R_{6M,i} = \frac{P_{t} - P_{t-126}}{P_{t-126}}$, with standard weights $w_1 = 0.6, w_2 = 0.4$.
+
+\textbf{Overall Score Combination}:
+\begin{equation}
+Score_{overall,i} = \alpha \cdot Quality_i + \beta \cdot Momentum_i + \gamma \cdot Macro_{adjust,i}
+\end{equation}
+
+Where $\alpha = 0.6, \beta = 0.3, \gamma = 0.1$ represent the relative importance of each component.
+
+The sector-relative approach addresses the \textbf{Sector Heterogeneity Problem}, ensuring that technology companies are compared against technology peers rather than utility companies.
+
+\subsection{Style Classification System}
+
+\subsubsection{Implementation}
+\begin{itemize}
+    \item \textbf{Quality}: High fundamental scores, moderate momentum
+    \item \textbf{Growth}: High revenue growth, strong momentum
+    \item \textbf{Value}: Lower valuations, improving fundamentals
+    \item \textbf{Blend}: Balanced characteristics across factors
+    \item \textbf{Weak}: Poor fundamentals (filtered out)
+\end{itemize}
+
+\subsubsection{Theoretical Foundation}
+Based on \textbf{Style Investing Theory} (Sharpe, 1992) and the \textbf{Fundamental Law of Active Management}:
+
+\begin{equation}
+IR = IC \sqrt{BR}
+\end{equation}
+
+Where $IR$ is Information Ratio, $IC$ is Information Coefficient, and $BR$ is Breadth. Style diversification increases breadth while maintaining predictive power.
+
+\textbf{Style Classification Rules}:
+\begin{align}
+Quality &: Quality_i > 75th \text{ percentile AND } |Momentum_i| < 50th \text{ percentile} \\
+Growth &: Revenue\_Growth_i > 75th \text{ percentile AND } Momentum_i > 50th \text{ percentile} \\
+Value &: P/E_i < 25th \text{ percentile AND } Quality_i > 25th \text{ percentile} \\
+Blend &: \text{All other qualifying securities} \\
+Weak &: Quality_i < 10th \text{ percentile OR } ROIC_i < 0
+\end{align}
+
+\subsection{Portfolio Construction Framework}
+
+\subsubsection{Implementation}
+\begin{itemize}
+    \item \textbf{Target Size}: 50 securities
+    \item \textbf{Style Allocation}: Quality (40\%), Growth (30\%), Value (20\%), Blend (10\%)
+    \item \textbf{Sector Constraints}: Maximum 25\% per sector
+    \item \textbf{Weighting}: Equal weight (2\% per position)
+\end{itemize}
+
+\subsubsection{Theoretical Foundation}
+The framework incorporates \textbf{Modern Portfolio Theory} (Markowitz, 1952) with practical constraints:
+
+\begin{equation}
+\max_w \quad w^T\mu - \frac{\lambda}{2}w^T\Sigma w
+\end{equation}
+
+Subject to:
+\begin{align}
+\sum_{i=1}^n w_i &= 1 \\
+w_i &\geq 0 \\
+\sum_{i \in sector_j} w_i &\leq 0.25 \\
+\sum_{i \in style_k} w_i &= target_{style_k}
+\end{align}
+
+Where $\lambda$ represents the risk aversion parameter and can be adjusted based on macroeconomic conditions:
+\begin{equation}
+\lambda_t = \lambda_0 \cdot (1 + \phi \cdot Recession\_Prob_t)
+\end{equation}
+
+\subsection{Risk Analysis and Management}
+
+\subsubsection{Implementation}
+\begin{itemize}
+    \item \textbf{Correlation Analysis}: Pairwise correlations with 80\% threshold
+    \item \textbf{Volatility Assessment}: Annualized individual and portfolio volatility
+    \item \textbf{Risk Metrics}: Sharpe ratio, maximum drawdown, beta analysis
+    \item \textbf{Concentration Risk}: Sector and style Herfindahl-Hirschman Index
+\end{itemize}
+
+\subsubsection{Theoretical Foundation and Detailed Risk Models}
+Risk management is based on \textbf{Factor Risk Models} and \textbf{Value at Risk Theory}:
+
+\textbf{Factor Risk Decomposition}:
+\begin{equation}
+\sigma_p^2 = w^T \Sigma w = w^T (B \Omega B^T + \Delta) w
+\end{equation}
+
+Where:
+\begin{align}
+B &= \text{Factor exposure matrix (n × k)} \\
+\Omega &= \text{Factor covariance matrix (k × k)} \\
+\Delta &= \text{Idiosyncratic risk matrix (n × n diagonal)} \\
+w &= \text{Portfolio weight vector (n × 1)}
+\end{align}
+
+\textbf{Risk Attribution}:
+\begin{equation}
+Risk\_Contribution_i = w_i \frac{\partial \sigma_p}{\partial w_i} = w_i \frac{(\Sigma w)_i}{\sigma_p}
+\end{equation}
+
+\textbf{Value at Risk (VaR)}:
+\begin{equation}
+VaR_\alpha = -\sigma_p \sqrt{T} \Phi^{-1}(\alpha)
+\end{equation}
+
+Where $\Phi^{-1}(\alpha)$ is the inverse normal CDF at confidence level $\alpha$.
+
+\textbf{Expected Shortfall (CVaR)}:
+\begin{equation}
+CVaR_\alpha = -\sigma_p \sqrt{T} \frac{\phi(\Phi^{-1}(\alpha))}{\alpha}
+\end{equation}
+
+\textbf{Concentration Risk Measures}:
+\begin{equation}
+HHI_{sector} = \sum_{j=1}^{n_{sectors}} \left(\sum_{i \in sector_j} w_i\right)^2
+\end{equation}
+
+\subsection{Macroeconomic Analysis Engine}
+
+\subsubsection{Implementation}
+\begin{itemize}
+    \item \textbf{Recession Probability Model}: Multi-tier weighted scoring system
+    \item \textbf{Yield Curve Analysis}: 2s10s spread, term spreads in basis points
+    \item \textbf{Market Regime Classification}: Volatility, economic cycle, rate environment
+    \item \textbf{Dynamic Allocation}: Risk multiplier (0.6x to 1.15x) based on macro conditions
+\end{itemize}
+
+\subsubsection{Theoretical Foundation and Detailed Models}
+The macro framework integrates \textbf{Business Cycle Theory} and \textbf{Regime-Switching Models}:
+
+\textbf{Recession Probability Model}:
+\begin{equation}
+P(Recession) = \Phi\left(\sum_{i=1}^n w_i \cdot Z_i\right)
+\end{equation}
+
+Where the standardized indicators are:
+\begin{align}
+Z_1 &= \frac{Curve_{2s10s} - \mu_{curve}}{\sigma_{curve}} \quad (w_1 = 0.25) \\
+Z_2 &= \frac{Term_{3m10s} - \mu_{term}}{\sigma_{term}} \quad (w_2 = 0.20) \\
+Z_3 &= \frac{LEI_{6m} - \mu_{LEI}}{\sigma_{LEI}} \quad (w_3 = 0.15) \\
+Z_4 &= \frac{Sahm - \mu_{sahm}}{\sigma_{sahm}} \quad (w_4 = 0.15) \\
+Z_5 &= \frac{HY_{spreads} - \mu_{HY}}{\sigma_{HY}} \quad (w_5 = 0.15) \\
+Z_6 &= \frac{Macro_{score} - \mu_{macro}}{\sigma_{macro}} \quad (w_6 = 0.10)
+\end{align}
+
+\textbf{Regime-Switching Model}:
+\begin{equation}
+R_t = \mu_{s_t} + \sigma_{s_t} \epsilon_t
+\end{equation}
+
+Where $s_t$ follows a Markov chain with transition probabilities:
+\begin{equation}
+P_{ij} = P(s_{t+1} = j | s_t = i)
+\end{equation}
+
+\textbf{Dynamic Risk Adjustment}:
+\begin{equation}
+Risk\_Multiplier_t = \begin{cases}
+0.6 & \text{if } P(Recession) > 70\% \\
+0.8 & \text{if } 40\% < P(Recession) \leq 70\% \\
+1.0 & \text{if } 15\% < P(Recession) \leq 40\% \\
+1.15 & \text{if } P(Recession) \leq 15\%
+\end{cases}
+\end{equation}
+
+\section{Operational Procedures and Data Update Frequencies}
+
+\subsection{Daily Operations}
+
+\subsubsection{Data Collection}
+\begin{itemize}
+    \item \textbf{Stock Prices}: Current prices for momentum calculations (3M, 6M returns)
+    \item \textbf{Market Volatility}: VIX level for risk regime classification  
+    \item \textbf{Treasury Yields}: 10Y, 2Y, 3M rates for yield curve analysis
+    \item \textbf{Key Market Indicators}: USD Index, Gold, Oil prices
+    \item \textbf{Fed Funds Rate}: Policy rate changes
+    \item \textbf{Portfolio Monitoring}: Current portfolio value and basic risk metrics
+\end{itemize}
+
+\subsubsection{Processing Schedule}
+\begin{longtable}{|p{3cm}|p{4cm}|p{6cm}|}
+\hline
+\textbf{Time} & \textbf{Process} & \textbf{Purpose} \\
+\hline
+9:00 AM & Market Open Data Pull & Capture overnight changes \\
+\hline
+12:00 PM & Mid-day Risk Check & Monitor intraday volatility \\
+\hline
+4:30 PM & Market Close Analysis & Final daily calculations \\
+\hline
+6:00 PM & Daily Report Generation & Summary for review \\
+\hline
+\end{longtable}
+
+\subsubsection{Mathematical Updates}
+Daily momentum calculation:
+\begin{equation}
+R_{3M,t} = \frac{P_t - P_{t-63}}{P_{t-63}}, \quad R_{6M,t} = \frac{P_t - P_{t-126}}{P_{t-126}}
+\end{equation}
+
+Daily volatility estimate (EWMA):
+\begin{equation}
+\sigma_t^2 = \lambda \sigma_{t-1}^2 + (1-\lambda) r_{t-1}^2
+\end{equation}
+Where $\lambda = 0.94$ (RiskMetrics standard).
+
+\subsection{Weekly Operations}
+
+\subsubsection{Risk Assessment}
+\begin{itemize}
+    \item \textbf{Correlation Analysis}: Portfolio stock correlations using weekly price data
+    \item \textbf{Volatility Assessment}: Rolling volatility calculations  
+    \item \textbf{Market Regime Check}: Confirm current volatility/risk regime
+    \item \textbf{Sector Performance}: Relative sector strength analysis
+    \item \textbf{Risk Metrics}: Updated Sharpe ratio, drawdown analysis
+\end{itemize}
+
+\subsubsection{Mathematical Procedures}
+Weekly correlation update:
+\begin{equation}
+\rho_{ij,t} = \frac{\sum_{k=1}^{52} (r_{i,t-k} - \bar{r}_{i})(r_{j,t-k} - \bar{r}_{j})}{\sqrt{\sum_{k=1}^{52} (r_{i,t-k} - \bar{r}_{i})^2 \sum_{k=1}^{52} (r_{j,t-k} - \bar{r}_{j})^2}}
+\end{equation}
+
+Rolling Sharpe ratio (52-week):
+\begin{equation}
+Sharpe_t = \frac{\bar{r}_p - r_f}{\sigma_p} \sqrt{52}
+\end{equation}
+
+\subsection{Biweekly Operations}
+
+\subsubsection{Macroeconomic Monitoring}
+\begin{itemize}
+    \item \textbf{Recession Indicators}: Credit spreads (HYG, LQD analysis), labor market data
+    \item \textbf{Yield Curve Analysis}: Full curve shape analysis and recession probability
+    \item \textbf{Fed Policy Assessment}: Interest rate environment classification
+\end{itemize}
+
+\subsubsection{Key Calculations}
+Yield curve slope update:
+\begin{equation}
+Curve_{2s10s} = Yield_{10Y} - Yield_{2Y}
+\end{equation}
+
+Credit spread estimation:
+\begin{equation}
+HY_{spread} = Base_{spread} - \frac{\Delta P_{HYG}}{P_{HYG}} \times 1000 \text{ bps}
+\end{equation}
+
+\subsection{Monthly Operations}
+
+\subsubsection{Strategic Rebalancing}
+\begin{itemize}
+    \item \textbf{Complete Macro Analysis}: Full recession probability model execution
+    \item \textbf{Fundamental Data Refresh}: Updated financials from quarterly reports
+    \item \textbf{Portfolio Rebalancing}: Complete scoring refresh and position adjustments
+    \item \textbf{Sector Recommendations}: Updated sector allocation guidance
+    \item \textbf{Style Rebalancing}: Adjust Quality/Growth/Value/Blend allocations
+    \item \textbf{Risk Multiplier Adjustment}: Update portfolio risk level based on macro conditions
+\end{itemize}
+
+\subsubsection{Rebalancing Mathematics}
+Style allocation adjustment:
+\begin{equation}
+w_{style,new} = w_{style,base} \times \left(1 + \delta_{macro} \times Recession\_Impact_{style}\right)
+\end{equation}
+
+Where:
+\begin{align}
+Recession\_Impact_{Quality} &= +0.5 \\
+Recession\_Impact_{Growth} &= -0.3 \\
+Recession\_Impact_{Value} &= -0.1 \\
+Recession\_Impact_{Blend} &= 0.0
+\end{align}
+
+\subsection{Quarterly Operations}
+
+\subsubsection{Complete System Overhaul}
+\begin{itemize}
+    \item \textbf{Complete Fundamental Overhaul}: All S\&P 600 companies rescored
+    \item \textbf{Universe Refresh}: Update S\&P 600 constituent list
+    \item \textbf{Full Portfolio Reconstruction}: Start from scratch with latest data
+    \item \textbf{Performance Attribution}: Analyze factor return contributions
+    \item \textbf{Strategy Validation}: Statistical significance tests of factor relationships
+\end{itemize}
+
+\subsubsection{Performance Attribution Model}
+\begin{equation}
+R_p - R_b = \sum_{i=1}^k \beta_i (F_i - E[F_i]) + \alpha + \epsilon
+\end{equation}
+
+Where factor contributions are:
+\begin{align}
+Contribution_{Size} &= \beta_{SMB} \times Return_{SMB} \\
+Contribution_{Quality} &= \beta_{QMJ} \times Return_{QMJ} \\
+Contribution_{Momentum} &= \beta_{MOM} \times Return_{MOM}
+\end{align}
+
+\section{Theoretical Foundations Summary}
+
+\subsection{Core Academic Literature}
+
+\begin{enumerate}
+    \item \textbf{Fama \& French (1993)}: "Common risk factors in the returns on stocks and bonds" - Multi-factor model foundation
+    \item \textbf{Jegadeesh \& Titman (1993)}: "Returns to buying winners and selling losers" - Momentum theory
+    \item \textbf{Asness et al. (2014)}: "Quality minus junk" - Quality factor definition
+    \item \textbf{Banz (1981)}: "The relationship between return and market value" - Size effect
+    \item \textbf{Markowitz (1952)}: "Portfolio selection" - Modern portfolio theory
+\end{enumerate}
+
+\subsection{Factor Integration Framework}
+
+The strategy integrates multiple well-documented factors:
+
+\begin{equation}
+E[R_i] = R_f + \beta_1 SMB + \beta_2 HML + \beta_3 MOM + \beta_4 QMJ + \beta_5 MACRO
+\end{equation}
+
+Where:
+\begin{itemize}
+    \item $SMB$ = Small Minus Big (size factor)
+    \item $HML$ = High Minus Low (value factor)  
+    \item $MOM$ = Momentum factor
+    \item $QMJ$ = Quality Minus Junk factor
+    \item $MACRO$ = Macroeconomic regime factor
+\end{itemize}
+
+\section{Advanced Mathematical Models}
+
+\subsection{Black-Litterman Model Implementation}
+
+The Black-Litterman model provides a framework for incorporating market views into portfolio optimization:
+
+\textbf{Prior Returns (Market Equilibrium)}:
+\begin{equation}
+\Pi = \lambda \Sigma w_{market}
+\end{equation}
+
+Where $\Pi$ represents the implied excess returns, $\lambda$ is the risk aversion coefficient, $\Sigma$ is the covariance matrix, and $w_{market}$ are market capitalization weights.
+
+\textbf{Posterior Expected Returns}:
+\begin{equation}
+\mu_{BL} = \left[(\tau\Sigma)^{-1} + P^T\Omega^{-1}P\right]^{-1}\left[(\tau\Sigma)^{-1}\Pi + P^T\Omega^{-1}Q\right]
+\end{equation}
+
+\textbf{Posterior Covariance Matrix}:
+\begin{equation}
+\Sigma_{BL} = \left[(\tau\Sigma)^{-1} + P^T\Omega^{-1}P\right]^{-1}
+\end{equation}
+
+Where:
+\begin{align}
+\tau &= \text{scalar indicating uncertainty in prior (typically 0.025-0.05)} \\
+P &= \text{picking matrix indicating which assets the views relate to} \\
+Q &= \text{vector of investor views on expected returns} \\
+\Omega &= \text{diagonal matrix expressing uncertainty in investor views}
+\end{align}
+
+\textbf{Application to Quality Momentum Strategy}:
+In our implementation, investor views ($Q$) are generated from:
+\begin{align}
+Q_{quality} &= \text{Expected outperformance of quality factor} \\
+Q_{momentum} &= \text{Expected continuation of momentum trends} \\
+Q_{macro} &= \text{Expected impact of recession probability on sectors}
+\end{align}
+
+\subsection{Risk Parity and Budgeting Models}
+
+\textbf{Equal Risk Contribution Portfolio}:
+The optimization problem for equal risk contribution:
+\begin{equation}
+\min_w \quad \sum_{i=1}^n \left(w_i \frac{\partial \sigma_p}{\partial w_i} - \frac{\sigma_p}{n}\right)^2
+\end{equation}
+
+Subject to: $\sum_{i=1}^n w_i = 1$
+
+\textbf{Risk Budgeting with Factor Exposures}:
+\begin{equation}
+Risk\_Budget_i = \frac{w_i^2 \sigma_i^2 + \sum_{j \neq i} w_i w_j \sigma_{ij}}{\sigma_p^2}
+\end{equation}
+
+\textbf{Factor Risk Budgeting}:
+\begin{equation}
+Factor\_Risk\_Budget_k = \frac{(w^T B_k)^2 \Omega_{kk}}{\sigma_p^2}
+\end{equation}
+
+Where $B_k$ is the $k$-th column of the factor exposure matrix.
+
+\subsection{Regime-Switching Models}
+
+\textbf{Hamilton Regime-Switching Model}:
+\begin{equation}
+r_t = \mu_{s_t} + \sigma_{s_t} \epsilon_t
+\end{equation}
+
+Where the regime $s_t$ follows:
+\begin{equation}
+P(s_t = j | s_{t-1} = i, \mathcal{F}_{t-1}) = p_{ij}
+\end{equation}
+
+\textbf{Transition Probability Matrix}:
+\begin{equation}
+P = \begin{pmatrix}
+p_{11} & p_{12} & \cdots & p_{1k} \\
+p_{21} & p_{22} & \cdots & p_{2k} \\
+\vdots & \vdots & \ddots & \vdots \\
+p_{k1} & p_{k2} & \cdots & p_{kk}
+\end{pmatrix}
+\end{equation}
+
+Where $\sum_{j=1}^k p_{ij} = 1$ for all $i$.
+
+\textbf{Filtered Probabilities}:
+\begin{equation}
+\xi_{t|t}(j) = P(s_t = j | \mathcal{F}_t) = \frac{\eta_t(j)}{\sum_{i=1}^k \eta_t(i)}
+\end{equation}
+
+Where:
+\begin{equation}
+\eta_t(j) = f(r_t | s_t = j) \sum_{i=1}^k \xi_{t-1|t-1}(i) p_{ij}
+\end{equation}
+
+\section{Potential Enhancements}
+
+\subsection{Advanced Analytics and Machine Learning}
+
+\subsubsection{Proposed Implementation}
+\begin{itemize}
+    \item \textbf{Random Forest Models}: For non-linear factor interactions
+    \item \textbf{LSTM Networks}: For time-series momentum prediction
+    \item \textbf{Ensemble Methods}: Combining multiple prediction models
+    \item \textbf{Feature Engineering}: Creating synthetic factors from raw data
+\end{itemize}
+
+\subsubsection{Theoretical Foundation}
+Based on \textbf{Statistical Learning Theory} (Vapnik, 1995) and \textbf{Ensemble Learning}:
+
+\textbf{Random Forest Prediction}:
+\begin{equation}
+\hat{f}_{RF}(x) = \frac{1}{B} \sum_{b=1}^B T_b(x)
+\end{equation}
+
+Where $T_b(x)$ represents individual decision trees trained on bootstrap samples.
+
+\textbf{LSTM for Sequential Prediction}:
+\begin{align}
+f_t &= \sigma(W_f \cdot [h_{t-1}, x_t] + b_f) \\
+i_t &= \sigma(W_i \cdot [h_{t-1}, x_t] + b_i) \\
+\tilde{C}_t &= \tanh(W_C \cdot [h_{t-1}, x_t] + b_C) \\
+C_t &= f_t * C_{t-1} + i_t * \tilde{C}_t \\
+o_t &= \sigma(W_o \cdot [h_{t-1}, x_t] + b_o) \\
+h_t &= o_t * \tanh(C_t)
+\end{align}
+
+\textbf{Ensemble Combination}:
+\begin{equation}
+\hat{f}(x) = \sum_{m=1}^M \alpha_m f_m(x)
+\end{equation}
+
+Where individual models $f_m(x)$ are combined with optimal weights $\alpha_m$ determined by:
+\begin{equation}
+\alpha^* = \arg\min_\alpha \sum_{i=1}^n \left(y_i - \sum_{m=1}^M \alpha_m f_m(x_i)\right)^2 + \lambda \|\alpha\|_2^2
+\end{equation}
+
+\subsection{Alternative Data Integration}
+
+\subsubsection{Proposed Implementation}
+\begin{itemize}
+    \item \textbf{Satellite Data}: Economic activity indicators
+    \item \textbf{Social Sentiment}: News and social media analysis
+    \item \textbf{Patent Data}: Innovation indicators for technology companies
+    \item \textbf{Supply Chain Data}: Operational efficiency metrics
+\end{itemize}
+
+\subsubsection{Theoretical Foundation}
+\textbf{Information Theory} (Shannon, 1948) suggests that unique information sources provide alpha:
+
+\begin{equation}
+I(X;Y) = \sum_{x,y} p(x,y) \log\frac{p(x,y)}{p(x)p(y)}
+\end{equation}
+
+Higher mutual information between alternative data and future returns indicates predictive value.
+
+\textbf{Sentiment Signal Construction}:
+\begin{equation}
+Sentiment_t = \frac{1}{n} \sum_{i=1}^n w_i \cdot Score_{news,i,t}
+\end{equation}
+
+Where $w_i$ represents the relevance weight of news source $i$.
+
+\subsection{ESG Integration}
+
+\subsubsection{Proposed Implementation}
+\begin{itemize}
+    \item \textbf{ESG Scoring}: Environmental, Social, Governance metrics
+    \item \textbf{Sustainability Tilt}: Overweight high ESG companies
+    \item \textbf{Exclusion Screens}: Remove companies with poor ESG profiles
+    \item \textbf{Impact Measurement}: Track portfolio ESG characteristics
+\end{itemize}
+
+\subsubsection{Theoretical Foundation}
+Based on \textbf{Stakeholder Theory} (Freeman, 1984) and evidence that ESG factors predict long-term performance:
+
+\begin{equation}
+R_{ESG} = \alpha + \beta_{market} R_{market} + \beta_{ESG} ESG_{score} + \epsilon
+\end{equation}
+
+\textbf{ESG-Adjusted Portfolio Optimization}:
+\begin{equation}
+\max_w \quad w^T\mu - \frac{\lambda}{2}w^T\Sigma w + \gamma w^T ESG
+\end{equation}
+
+Where $\gamma$ represents the ESG preference parameter.
+
+\subsection{Options Overlay Strategies}
+
+\subsubsection{Proposed Implementation}
+\begin{itemize}
+    \item \textbf{Covered Calls}: Income generation during low volatility periods
+    \item \textbf{Protective Puts}: Downside protection during high-risk periods
+    \item \textbf{Collar Strategies}: Risk management for concentrated positions
+    \item \textbf{Volatility Trading}: Systematic volatility harvesting
+\end{itemize}
+
+\subsubsection{Theoretical Foundation}
+\textbf{Black-Scholes-Merton Model}:
+
+\begin{equation}
+C = S_0 N(d_1) - Ke^{-rT} N(d_2)
+\end{equation}
+
+Where:
+\begin{align}
+d_1 &= \frac{\ln(S_0/K) + (r + \sigma^2/2)T}{\sigma\sqrt{T}} \\
+d_2 &= d_1 - \sigma\sqrt{T}
+\end{align}
+
+\textbf{Volatility Risk Premium Strategy}:
+\begin{equation}
+VRP_t = IV_t - RV_t
+\end{equation}
+
+Where $IV_t$ is implied volatility and $RV_t$ is realized volatility.
+
+\textbf{Dynamic Hedging Ratio}:
+\begin{equation}
+h_t = \Delta_t + \frac{1}{2}\Gamma_t \sigma_t^2 dt
+\end{equation}
+
+\section{Future Development Roadmap}
+
+\subsection{Phase 1: Backtesting and Validation Framework}
+
+\subsubsection{Implementation Plan}
+\begin{itemize}
+    \item \textbf{Historical Simulation}: 10+ years of backtesting
+    \item \textbf{Performance Attribution}: Factor return decomposition
+    \item \textbf{Risk Analysis}: Stress testing and scenario analysis
+    \item \textbf{Transaction Costs}: Realistic implementation costs
+\end{itemize}
+
+\subsubsection{Timeline}
+Q1 2024: Complete backtesting framework development
+
+\subsubsection{Theoretical Foundation}
+\textbf{Monte Carlo Simulation} and \textbf{Bootstrap Methods} for statistical validation:
+
+\begin{equation}
+\hat{\theta}^* = \arg\min_\theta \sum_{i=1}^n L(y_i^*, f(x_i^*, \theta))
+\end{equation}
+
+\textbf{Walk-Forward Analysis}:
+\begin{equation}
+R_{out,t} = f(\theta_t^*, X_{t}) - R_{actual,t}
+\end{equation}
+
+Where $\theta_t^*$ is estimated using data up to time $t-1$.
+
+\subsection{Phase 2: Real-Time Monitoring and Execution}
+
+\subsubsection{Implementation Plan}
+\begin{itemize}
+    \item \textbf{Live Data Feeds}: Real-time price and fundamental updates
+    \item \textbf{Portfolio Monitoring}: Daily risk and performance tracking
+    \item \textbf{Rebalancing Logic}: Systematic portfolio maintenance
+    \item \textbf{Execution Algorithms}: Optimal order execution
+\end{itemize}
+
+\subsubsection{Timeline}
+Q2 2024: Production-ready monitoring system
+
+\textbf{Optimal Execution (TWAP)}:
+\begin{equation}
+q_t = \frac{Q}{T} + \gamma \left(\frac{Q}{T} - q_{t-1}\right)
+\end{equation}
+
+Where $Q$ is total quantity to trade, $T$ is time horizon, and $\gamma$ is adaptation parameter.
+
+\subsection{Phase 3: Advanced Optimization}
+
+\subsubsection{Implementation Plan}
+\begin{itemize}
+    \item \textbf{Mean-Variance Optimization}: Risk-adjusted portfolio construction
+    \item \textbf{Black-Litterman Model}: Incorporating investor views
+    \item \textbf{Risk Budgeting}: Systematic risk allocation
+    \item \textbf{Factor Timing}: Dynamic factor exposures
+\end{itemize}
+
+\subsubsection{Timeline}
+Q3 2024: Advanced optimization capabilities
+
+\section{Risk Considerations and Limitations}
+
+\subsection{Model Risk}
+\begin{itemize}
+    \item \textbf{Factor Decay}: Historical relationships may not persist
+    \item \textbf{Overfitting}: Complex models may not generalize
+    \item \textbf{Regime Changes}: Structural breaks in factor effectiveness
+\end{itemize}
+
+\subsection{Implementation Risk}
+\begin{itemize}
+    \item \textbf{Liquidity Constraints}: Small-cap trading limitations
+    \item \textbf{Transaction Costs}: Impact on realized returns
+    \item \textbf{Data Quality}: Errors in fundamental data
+\end{itemize}
+
+\subsection{Market Risk}
+\begin{itemize}
+    \item \textbf{Small-Cap Volatility}: Higher volatility than large-cap
+    \item \textbf{Economic Sensitivity}: Small-caps more sensitive to recessions
+    \item \textbf{Style Rotation}: Periods of underperformance during style rotation
+\end{itemize}
+
+\section{Conclusion}
+
+The Quality Momentum Strategy represents a comprehensive approach to systematic small-cap investing, combining robust theoretical foundations with practical implementation considerations. The current system provides a solid foundation for institutional-quality investment management, while the proposed enhancements offer significant opportunities for alpha generation and risk management improvement.
+
+The integration of macroeconomic analysis with fundamental and momentum factors creates a differentiated approach that can adapt to changing market conditions while maintaining systematic discipline. Future development will focus on enhancing predictive power through advanced analytics while maintaining the strategy's core theoretical foundations.
+
+\section{References}
+
+\begin{thebibliography}{20}
+
+\bibitem{asness2014}
+Asness, C. S., Frazzini, A., \& Pedersen, L. H. (2014). Quality minus junk. \textit{AQR Capital Management}.
+
+\bibitem{banz1981}
+Banz, R. W. (1981). The relationship between return and market value of common stocks. \textit{Journal of Financial Economics}, 9(1), 3-18.
+
+\bibitem{fama1993}
+Fama, E. F., \& French, K. R. (1993). Common risk factors in the returns on stocks and bonds. \textit{Journal of Financial Economics}, 33(1), 3-56.
+
+\bibitem{freeman1984}
+Freeman, R. E. (1984). \textit{Strategic management: A stakeholder approach}. Cambridge University Press.
+
+\bibitem{jegadeesh1993}
+Jegadeesh, N., \& Titman, S. (1993). Returns to buying winners and selling losers: Implications for stock market efficiency. \textit{Journal of Finance}, 48(1), 65-91.
+
+\bibitem{markowitz1952}
+Markowitz, H. (1952). Portfolio selection. \textit{Journal of Finance}, 7(1), 77-91.
+
+\bibitem{shannon1948}
+Shannon, C. E. (1948). A mathematical theory of communication. \textit{Bell System Technical Journal}, 27(3), 379-423.
+
+\bibitem{sharpe1992}
+Sharpe, W. F. (1992). Asset allocation: Management style and performance measurement. \textit{Journal of Portfolio Management}, 18(2), 7-19.
+
+\bibitem{vapnik1995}
+Vapnik, V. N. (1995). \textit{The nature of statistical learning theory}. Springer-Verlag.
+
+\end{thebibliography}
+
+\end{document} 
