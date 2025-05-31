@@ -23,13 +23,18 @@ async def scrape_fed_data():
                 print("Fed Funds Rate element not found")
                 fed_funds_rate = "Not found"
             
-            # Get PCE Inflation from card structure
-            inflation_element = await page.query_selector('div.mb75.homepageBox >> text=Inflation (PCE)')
+            # Get PCE Inflation with exact class combination
+            inflation_element = await page.query_selector('span._bold_1sxcz_1._smaller_1sxcz_11')
             if inflation_element:
-                parent_card = await inflation_element.evaluate('element => element.closest(".card")')
-                if parent_card:
-                    inflation_text = await parent_card.text_content()
-                    print(f"Found Inflation text: {inflation_text}")
+                inflation_rate = await inflation_element.text_content()
+                # Get the date which is in the next span
+                date_element = await page.query_selector('span._date_1sxcz_17')
+                if date_element:
+                    date_text = await date_element.text_content()
+                    inflation_text = f"{inflation_rate} ({date_text})"
+                else:
+                    inflation_text = inflation_rate
+                print(f"Found Inflation: {inflation_text}")
             else:
                 print("Inflation element not found")
                 inflation_text = "Not found"
