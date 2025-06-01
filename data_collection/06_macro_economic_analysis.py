@@ -1746,6 +1746,7 @@ def main():
         }
         
         # Save enhanced CSV for strategy integration
+        macro_file = os.path.join('..', 'csv_data_files', '05_macro_economic_analysis_2025-05-31.csv')
         macro_df = pd.DataFrame([{
             'Date': timestamp,
             'Data_Source': macro_data['data_sources']['primary_data_source'],
@@ -1788,7 +1789,7 @@ def main():
         }])
         
         # Save files
-        macro_file = f"06_enhanced_macro_analysis_{timestamp}.csv"
+        macro_file = os.path.join('..', 'csv_data_files', '05_macro_economic_analysis_2025-05-31.csv')
         macro_df.to_csv(macro_file, index=False)
         print(f"💾 Enhanced macro analysis saved to {macro_file}")
         
