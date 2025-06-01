@@ -10,6 +10,7 @@ scipy>=1.9.0
 # yfinance>=0.2.0         # Removed: Now using FMP API for historical data
 requests>=2.28.0         # For FMP API calls and general HTTP requests
 alpaca-trade-api>=3.0.0  # Paper trading integration
+ib_insync>=0.9.86        # IBKR TWS integration (Interactive Brokers)
 
 # Visualization & Reporting
 matplotlib>=3.6.0

@@ -1,0 +1,47 @@
+{
+  "fed_funds_rate": {
+    "current": 4.33,
+    "date": "2025-04-01",
+    "source": "FRED_CSV"
+  },
+  "unemployment_rate": {
+    "current": 4.2,
+    "date": "2025-04-01",
+    "source": "FRED_CSV"
+  },
+  "core_pce_inflation": {
+    "current": 125.221,
+    "date": "2025-04-01",
+    "source": "FRED_CSV"
+  },
+  "treasury_10y": {
+    "current": 4.28,
+    "date": "2025-04-01",
+    "source": "FRED_CSV"
+  },
+  "treasury_2y": {
+    "current": 3.78,
+    "date": "2025-04-01",
+    "source": "FRED_CSV"
+  },
+  "treasury_3m": {
+    "current": 4.32,
+    "date": "2025-04-01",
+    "source": "FRED_CSV"
+  },
+  "consumer_sentiment": {
+    "current": 75.0,
+    "date": "2025-06-01",
+    "source": "FALLBACK"
+  },
+  "nonfarm_payrolls": {
+    "current": 150000,
+    "date": "2025-06-01",
+    "source": "FALLBACK"
+  },
+  "initial_claims": {
+    "current": 350000,
+    "date": "2025-06-01",
+    "source": "FALLBACK"
+  }
+}
