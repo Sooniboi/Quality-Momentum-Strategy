@@ -1,0 +1,127 @@
+{
+  "analysis_date": "2025-06-01T16:20:21.734690",
+  "market_regime": {
+    "rate_environment": {
+      "rate_environment": "Dovish Expectations",
+      "policy_stance": "Market expects aggressive cuts",
+      "growth_vs_value": "Strong Growth Tilt",
+      "fed_funds_rate": 4.33,
+      "ten_year_rate": 0.042800000000000005,
+      "fed_10y_spread_bps": -428.72,
+      "fed_2y_spread_bps": -429.22,
+      "real_10y_estimate": -2.4572
+    },
+    "policy_stance": "Market expects aggressive cuts",
+    "economic_cycle": "Mid-Late Cycle",
+    "volatility_regime": "Normal Volatility",
+    "risk_appetite": "Moderate"
+  },
+  "recession_analysis": {
+    "probability": 22.1,
+    "confidence_intervals": {
+      "68_percent": "17.9% - 26.9%",
+      "90_percent": "15.4% - 30.2%"
+    },
+    "risk_level": "Moderate",
+    "sahm_rule_status": "Normal",
+    "yield_curve_signal": "Normal"
+  },
+  "fed_policy": {
+    "timestamp": "2025-06-01 16:20:21",
+    "data_quality": "medium",
+    "current_fed_funds_rate": 4.33,
+    "employment_analysis": {
+      "signal": "\ud83d\udfe1 Moderate Employment (neutral)",
+      "score": 0,
+      "unemployment_rate": 4.2
+    },
+    "inflation_analysis": {
+      "signal": "\ud83d\udd34 High Inflation (hawkish pressure)",
+      "score": 2,
+      "core_pce_rate": 125.221
+    },
+    "yield_curve_analysis": {
+      "signal": "\ud83d\udfe2 Normal Yield Curve (healthy)",
+      "score": 1,
+      "spread_10y_2y": 0.5000000000000004
+    },
+    "consumer_sentiment_analysis": {
+      "signal": "\ud83d\udfe1 Moderate Consumer Sentiment",
+      "score": 0,
+      "level": 75.0
+    },
+    "overall_assessment": {
+      "policy_bias": "\ud83d\udd34 STRONGLY HAWKISH",
+      "explanation": "Rate hikes very likely",
+      "rate_direction": "UP",
+      "total_score": 3,
+      "terminal_rate_estimate": 4.83
+    }
+  },
+  "economic_indicators": {
+    "vix": 18.57,
+    "usd_index": 99.44,
+    "gold_price": 3315.4,
+    "oil_price": 60.79
+  },
+  "risk_recommendations": {
+    "overall_risk_multiplier": 0.95,
+    "sector_risk_adjustments": {
+      "Technology": {
+        "base_weight": 0.12,
+        "recommended_weight": 0.14314115308151096,
+        "change": 0.023141153081510962,
+        "action": "Overweight"
+      },
+      "Healthcare": {
+        "base_weight": 0.12,
+        "recommended_weight": 0.13121272365805173,
+        "change": 0.011212723658051732,
+        "action": "Overweight"
+      },
+      "Financial Services": {
+        "base_weight": 0.1,
+        "recommended_weight": 0.08946322067594437,
+        "change": -0.01053677932405564,
+        "action": "Underweight"
+      },
+      "Real Estate": {
+        "base_weight": 0.08,
+        "recommended_weight": 0.06361829025844933,
+        "change": -0.016381709741550676,
+        "action": "Underweight"
+      },
+      "Utilities": {
+        "base_weight": 0.06,
+        "recommended_weight": 0.04771371769383699,
+        "change": -0.012286282306163007,
+        "action": "Underweight"
+      }
+    },
+    "style_risk_adjustments": {
+      "Growth": {
+        "base_allocation": 0.3,
+        "recommended_allocation": 0.35,
+        "change": 0.04999999999999999,
+        "action": "Increase"
+      },
+      "Value": {
+        "base_allocation": 0.2,
+        "recommended_allocation": 0.17,
+        "change": -0.03,
+        "action": "Decrease"
+      },
+      "Blend": {
+        "base_allocation": 0.1,
+        "recommended_allocation": 0.08,
+        "change": -0.020000000000000004,
+        "action": "Decrease"
+      }
+    },
+    "key_risks": [
+      "VIX at 18.6 indicates Normal Volatility market conditions",
+      "Recession probability: 22%",
+      "Key risks: sahm_rule: TRIGGERED - Recession likely started"
+    ]
+  }
+}

@@ -607,7 +607,7 @@ def calculate_yield_curve_metrics(treasury_rates: Dict) -> Dict:
     }
 
 def calculate_recession_probability_nyfed(treasury_rates: Dict, recession_indicators: Dict, 
-                                        economic_indicators: Dict) -> Dict:
+                                  economic_indicators: Dict) -> Dict:
     """
     Calculate recession probability using NY Fed probit model approach.
     
@@ -1745,8 +1745,23 @@ def main():
             'risk_adjustments': risk_adj
         }
         
-        # Save enhanced CSV for strategy integration
-        macro_file = os.path.join('..', 'csv_data_files', '05_macro_economic_analysis_2025-05-31.csv')
+        # Save all outputs to appropriate folders
+        
+        # 1. Main macro analysis to macro_analysis folder  
+        macro_output_dir = os.path.join(os.path.dirname(__file__), '..', 'csv_data_files', 'macro_analysis')
+        os.makedirs(macro_output_dir, exist_ok=True)
+        macro_output_path = os.path.join(macro_output_dir, f"05_macro_economic_analysis_{timestamp}.csv")
+        
+        # 2. Fed policy and FRED data to risk_analysis folder (update in place)
+        risk_output_dir = os.path.join(os.path.dirname(__file__), '..', 'csv_data_files', 'risk_analysis')
+        os.makedirs(risk_output_dir, exist_ok=True)
+        
+        # Update in place - always same filename
+        fred_output_path = os.path.join(risk_output_dir, "fred_economic_data_latest.json")
+        fed_policy_path = os.path.join(risk_output_dir, "fed_policy_analysis_latest.json")
+        macro_risk_path = os.path.join(risk_output_dir, "macro_risk_analysis_latest.json")
+        
+        # Save main macro analysis
         macro_df = pd.DataFrame([{
             'Date': timestamp,
             'Data_Source': macro_data['data_sources']['primary_data_source'],
@@ -1788,22 +1803,54 @@ def main():
             'Risk_Adjustment_Factor': risk_adj.get('risk_multiplier', 1.0)
         }])
         
-        # Save files
-        macro_file = os.path.join('..', 'csv_data_files', '05_macro_economic_analysis_2025-05-31.csv')
-        macro_df.to_csv(macro_file, index=False)
-        print(f"💾 Enhanced macro analysis saved to {macro_file}")
+        # Save main macro analysis
+        macro_df.to_csv(macro_output_path, index=False)
+        print(f"💾 Enhanced macro analysis saved to {macro_output_path}")
         
-        # Save detailed FRED data for advanced analysis
-        fred_file = f"fred_economic_data_{timestamp}.json"
-        with open(fred_file, 'w') as f:
+        # Save FRED data to risk_analysis (update in place)
+        with open(fred_output_path, 'w') as f:
             json.dump(fred_data, f, indent=2, default=str)
-        print(f"📊 FRED data saved to {fred_file}")
+        print(f"📊 FRED data updated in {fred_output_path}")
         
-        # Save Fed policy analysis
-        fed_policy_file = f"fed_policy_analysis_{timestamp}.json"
-        with open(fed_policy_file, 'w') as f:
+        # Save Fed policy analysis to risk_analysis (update in place)
+        with open(fed_policy_path, 'w') as f:
             json.dump(fed_policy_analysis, f, indent=2, default=str)
-        print(f"🎯 Fed policy analysis saved to {fed_policy_file}")
+        print(f"🎯 Fed policy analysis updated in {fed_policy_path}")
+        
+        # Create comprehensive macro risk analysis
+        macro_risk_analysis = {
+            'analysis_date': datetime.now().isoformat(),
+            'market_regime': {
+                'rate_environment': rate_environment,
+                'policy_stance': rate_environment.get('policy_stance', 'N/A'), 
+                'economic_cycle': market_regime.get('economic_cycle', 'N/A'),
+                'volatility_regime': market_regime.get('volatility_regime', 'N/A'),
+                'risk_appetite': market_regime.get('risk_appetite', 'N/A')
+            },
+            'recession_analysis': {
+                'probability': recession_analysis.get('recession_probability', 0),
+                'confidence_intervals': {
+                    '68_percent': f"{recession_analysis.get('confidence_68_lower', 0):.1f}% - {recession_analysis.get('confidence_68_upper', 0):.1f}%",
+                    '90_percent': f"{recession_analysis.get('confidence_90_lower', 0):.1f}% - {recession_analysis.get('confidence_90_upper', 0):.1f}%"
+                },
+                'risk_level': recession_analysis.get('risk_level', 'N/A'),
+                'sahm_rule_status': 'TRIGGERED' if recession_analysis.get('supplemental_indicators', {}).get('sahm_rule', 'Normal') == 'TRIGGERED' else 'Normal',
+                'yield_curve_signal': 'Inverted' if recession_analysis.get('term_spread_10y3m', 0) < 0 else 'Normal'
+            },
+            'fed_policy': fed_policy_analysis,
+            'economic_indicators': economic_indicators,
+            'risk_recommendations': {
+                'overall_risk_multiplier': risk_adj.get('risk_multiplier', 1.0),
+                'sector_risk_adjustments': sector_recs,
+                'style_risk_adjustments': style_recs,
+                'key_risks': risk_adj.get('rationale', '').split('; ')
+            }
+        }
+        
+        # Save comprehensive macro risk analysis (update in place)
+        with open(macro_risk_path, 'w') as f:
+            json.dump(macro_risk_analysis, f, indent=2, default=str)
+        print(f"⚠️ Comprehensive macro risk analysis updated in {macro_risk_path}")
         
         # =================================================================
         # PERFORMANCE & SUMMARY

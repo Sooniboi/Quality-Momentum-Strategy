@@ -1,0 +1,2 @@
+Analysis_Date,Portfolio_Size,Simulations,Time_Horizon_Days,Expected_Return,Volatility,Sharpe_Ratio,VaR_95,VaR_99,Max_Drawdown_95,Prob_Positive,Prob_Beat_Market,Market_Regime
+2025-06-01,29,10000,252,0.10641327704445801,0.13596719586691128,0.414903585271237,-0.10156096998920978,-0.16989219843582895,-0.05407170579366734,0.7733,0.5557,NORMAL
