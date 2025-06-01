@@ -1,0 +1,32 @@
+{
+  "timestamp": "2025-06-01 20:57:15",
+  "data_quality": "medium",
+  "current_fed_funds_rate": 4.33,
+  "employment_analysis": {
+    "signal": "\ud83d\udfe1 Moderate Employment (neutral)",
+    "score": 0,
+    "unemployment_rate": 4.2
+  },
+  "inflation_analysis": {
+    "signal": "\ud83d\udd34 High Inflation (hawkish pressure)",
+    "score": 2,
+    "core_pce_rate": 125.221
+  },
+  "yield_curve_analysis": {
+    "signal": "\ud83d\udfe2 Normal Yield Curve (healthy)",
+    "score": 1,
+    "spread_10y_2y": 0.5000000000000004
+  },
+  "consumer_sentiment_analysis": {
+    "signal": "\ud83d\udfe1 Moderate Consumer Sentiment",
+    "score": 0,
+    "level": 75.0
+  },
+  "overall_assessment": {
+    "policy_bias": "\ud83d\udd34 STRONGLY HAWKISH",
+    "explanation": "Rate hikes very likely",
+    "rate_direction": "UP",
+    "total_score": 3,
+    "terminal_rate_estimate": 4.83
+  }
+}
