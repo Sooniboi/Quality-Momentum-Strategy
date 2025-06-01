@@ -1,0 +1,8 @@
+metric,value,type,timestamp
+fed_integration_data_reliability_cme_available,False,bool,2025-06-01 13:39:45.688107
+fed_integration_data_reliability_fred_available,False,bool,2025-06-01 13:39:45.688108
+fed_integration_data_reliability_te_available,False,bool,2025-06-01 13:39:45.688108
+fed_integration_data_reliability_completeness_score,0,int,2025-06-01 13:39:45.688109
+fed_policy_impact_growth_vs_value_signal,Neutral,str,2025-06-01 13:39:45.688111
+fed_policy_impact_duration_risk_assessment,Moderate,str,2025-06-01 13:39:45.688112
+fed_policy_impact_equity_risk_premium_outlook,Stable,str,2025-06-01 13:39:45.688113

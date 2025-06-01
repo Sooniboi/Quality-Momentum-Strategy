@@ -1,0 +1,211 @@
+{
+  "macro_risk_level": "Moderate",
+  "recession_probability": 22.1,
+  "risk_adjustment_factor": 0.95,
+  "risk_impact": "Monitor closely, slight defensive bias",
+  "fed_policy_bias": "\ud83d\udd34 STRONGLY HAWKISH",
+  "fed_rate_direction": "UP",
+  "yield_curve_bps": 0.5000000000000004,
+  "vix_level": 18.57,
+  "data_source": "FMP+Fallback",
+  "sector_macro_risks": {
+    "Financial Services": {
+      "portfolio_weight": 0.17857142857142858,
+      "stock_count": 5,
+      "macro_risk_score": 0.85,
+      "sensitivity_profile": {
+        "recession_sensitivity": "Very High",
+        "fed_policy_sensitivity": "Very High",
+        "risk_in_recession": "Very High",
+        "risk_with_hawkish_fed": "Low"
+      },
+      "risk_level": "Low"
+    },
+    "Healthcare": {
+      "portfolio_weight": 0.17857142857142858,
+      "stock_count": 5,
+      "macro_risk_score": 0.85,
+      "sensitivity_profile": {
+        "recession_sensitivity": "Low",
+        "fed_policy_sensitivity": "Low",
+        "risk_in_recession": "Low",
+        "risk_with_hawkish_fed": "Low"
+      },
+      "risk_level": "Low"
+    },
+    "Consumer Cyclical": {
+      "portfolio_weight": 0.10714285714285714,
+      "stock_count": 3,
+      "macro_risk_score": 1.15,
+      "sensitivity_profile": {
+        "recession_sensitivity": "Very High",
+        "fed_policy_sensitivity": "High",
+        "risk_in_recession": "Very High",
+        "risk_with_hawkish_fed": "High"
+      },
+      "risk_level": "Moderate"
+    },
+    "Consumer Defensive": {
+      "portfolio_weight": 0.10714285714285714,
+      "stock_count": 3,
+      "macro_risk_score": 0.85,
+      "sensitivity_profile": {
+        "recession_sensitivity": "Low",
+        "fed_policy_sensitivity": "Low",
+        "risk_in_recession": "Low",
+        "risk_with_hawkish_fed": "Low"
+      },
+      "risk_level": "Low"
+    },
+    "Energy": {
+      "portfolio_weight": 0.10714285714285714,
+      "stock_count": 3,
+      "macro_risk_score": 1.0,
+      "sensitivity_profile": {
+        "recession_sensitivity": "High",
+        "fed_policy_sensitivity": "Moderate",
+        "risk_in_recession": "High",
+        "risk_with_hawkish_fed": "Moderate"
+      },
+      "risk_level": "Moderate"
+    },
+    "Technology": {
+      "portfolio_weight": 0.10714285714285714,
+      "stock_count": 3,
+      "macro_risk_score": 1.15,
+      "sensitivity_profile": {
+        "recession_sensitivity": "High",
+        "fed_policy_sensitivity": "High",
+        "risk_in_recession": "Very High",
+        "risk_with_hawkish_fed": "High"
+      },
+      "risk_level": "Moderate"
+    },
+    "Basic Materials": {
+      "portfolio_weight": 0.07142857142857142,
+      "stock_count": 2,
+      "macro_risk_score": 1.0,
+      "sensitivity_profile": {
+        "recession_sensitivity": "Very High",
+        "fed_policy_sensitivity": "Moderate",
+        "risk_in_recession": "Very High",
+        "risk_with_hawkish_fed": "Moderate"
+      },
+      "risk_level": "Moderate"
+    },
+    "Real Estate": {
+      "portfolio_weight": 0.07142857142857142,
+      "stock_count": 2,
+      "macro_risk_score": 1.3,
+      "sensitivity_profile": {
+        "recession_sensitivity": "Very High",
+        "fed_policy_sensitivity": "Very High",
+        "risk_in_recession": "Very High",
+        "risk_with_hawkish_fed": "Very High"
+      },
+      "risk_level": "High"
+    },
+    "Industrials": {
+      "portfolio_weight": 0.03571428571428571,
+      "stock_count": 1,
+      "macro_risk_score": 1.0,
+      "sensitivity_profile": {
+        "recession_sensitivity": "High",
+        "fed_policy_sensitivity": "Moderate",
+        "risk_in_recession": "High",
+        "risk_with_hawkish_fed": "Moderate"
+      },
+      "risk_level": "Moderate"
+    },
+    "Utilities": {
+      "portfolio_weight": 0.03571428571428571,
+      "stock_count": 1,
+      "macro_risk_score": 1.0,
+      "sensitivity_profile": {
+        "recession_sensitivity": "Low",
+        "fed_policy_sensitivity": "Moderate",
+        "risk_in_recession": "Low",
+        "risk_with_hawkish_fed": "Moderate"
+      },
+      "risk_level": "Moderate"
+    }
+  },
+  "fed_policy_impact": {
+    "fed_policy_bias": "\ud83d\udd34 STRONGLY HAWKISH",
+    "fed_rate_direction": "UP",
+    "yield_curve_bps": 0.5000000000000004,
+    "sector_impacts": {
+      "Financial Services": {
+        "portfolio_weight": 0.17857142857142858,
+        "fed_impact_score": 0.2,
+        "impact_factors": [
+          "Benefits from rising rates"
+        ],
+        "overall_impact": "Positive"
+      },
+      "Healthcare": {
+        "portfolio_weight": 0.17857142857142858,
+        "fed_impact_score": 0,
+        "impact_factors": [],
+        "overall_impact": "Neutral"
+      },
+      "Consumer Cyclical": {
+        "portfolio_weight": 0.10714285714285714,
+        "fed_impact_score": 0,
+        "impact_factors": [],
+        "overall_impact": "Neutral"
+      },
+      "Consumer Defensive": {
+        "portfolio_weight": 0.10714285714285714,
+        "fed_impact_score": 0,
+        "impact_factors": [],
+        "overall_impact": "Neutral"
+      },
+      "Energy": {
+        "portfolio_weight": 0.10714285714285714,
+        "fed_impact_score": 0,
+        "impact_factors": [],
+        "overall_impact": "Neutral"
+      },
+      "Technology": {
+        "portfolio_weight": 0.10714285714285714,
+        "fed_impact_score": -0.3,
+        "impact_factors": [
+          "Pressure from rising rates"
+        ],
+        "overall_impact": "Negative"
+      },
+      "Basic Materials": {
+        "portfolio_weight": 0.07142857142857142,
+        "fed_impact_score": 0,
+        "impact_factors": [],
+        "overall_impact": "Neutral"
+      },
+      "Real Estate": {
+        "portfolio_weight": 0.07142857142857142,
+        "fed_impact_score": -0.3,
+        "impact_factors": [
+          "Pressure from rising rates"
+        ],
+        "overall_impact": "Negative"
+      },
+      "Industrials": {
+        "portfolio_weight": 0.03571428571428571,
+        "fed_impact_score": 0,
+        "impact_factors": [],
+        "overall_impact": "Neutral"
+      },
+      "Utilities": {
+        "portfolio_weight": 0.03571428571428571,
+        "fed_impact_score": -0.3,
+        "impact_factors": [
+          "Pressure from rising rates"
+        ],
+        "overall_impact": "Negative"
+      }
+    },
+    "overall_portfolio_fed_impact": -0.02857142857142856
+  },
+  "macro_adjusted_risk_multiplier": 0.95,
+  "analysis_date": "2025-06-01"
+}

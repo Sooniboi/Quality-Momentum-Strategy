@@ -127,9 +127,10 @@ def main():
         print("  • 02_fundamentals_with_momentum_YYYY-MM-DD.csv") 
         print("  • 03_sector_scored_companies_YYYY-MM-DD.csv")
         print("  • 04_final_portfolio_selection_YYYY-MM-DD.csv")
-        print("  • 05_macro_economic_analysis_YYYY-MM-DD.csv")
+        print("  • 06_enhanced_macro_analysis_YYYY-MM-DD.csv    # NY Fed probit model + FRED data")
         print("  • risk_analysis/portfolio_correlations_YYYY-MM-DD.csv")
-        print("  • risk_analysis/portfolio_risk_metrics_YYYY-MM-DD.csv")
+        print("  • risk_analysis/portfolio_risk_metrics_YYYY-MM-DD.csv   # Enhanced with macro risk")
+        print("  • risk_analysis/macro_risk_analysis_YYYY-MM-DD.json     # Detailed macro analysis")
         
         print(f"\n📈 Your Quality Momentum Strategy portfolio is ready!")
         
