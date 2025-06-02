@@ -5,6 +5,7 @@ import glob
 from datetime import date, datetime
 from typing import Dict, List, Optional
 import json
+import importlib.util
 
 class UnifiedPortfolioConstructor:
     """
@@ -134,102 +135,253 @@ class UnifiedPortfolioConstructor:
         return sector_data, macro_data, risk_data
     
     def _integrate_macro_conditions(self, sector_data: pd.DataFrame, macro_data: pd.DataFrame) -> pd.DataFrame:
-        """Integrate macro economic conditions into company scoring."""
-        print("\n🌍 INTEGRATING MACRO CONDITIONS")
+        """Integrate enhanced macro economic conditions into company scoring."""
+        print("\n🌍 INTEGRATING ENHANCED MACRO CONDITIONS")
         print("-" * 40)
         
         df = sector_data.copy()
         
-        # Determine market regime from enhanced macro risk analysis if available
-        if hasattr(self, 'risk_data') and 'macro_risk' in self.risk_data:
-            macro_risk = self.risk_data['macro_risk']
-            recession_prob = macro_risk.get('recession_analysis', {}).get('probability', 20)
-            fed_policy_bias = self.risk_data.get('fed_policy', {}).get('overall_assessment', {}).get('policy_bias', 'NEUTRAL')
+        # Check for defensive mode signal from weekly trading system
+        defensive_signal_file = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'processed', 'temp_signals', 'defensive_mode.json')
+        forced_defensive = False
+        
+        if os.path.exists(defensive_signal_file):
+            try:
+                with open(defensive_signal_file, 'r') as f:
+                    defensive_signal = json.load(f)
+                print(f"🛡️ DEFENSIVE MODE SIGNAL DETECTED: {defensive_signal.get('reason', 'Unknown')}")
+                forced_defensive = True
+            except Exception as e:
+                print(f"⚠️ Error reading defensive signal: {e}")
+        
+        # Enhanced market regime detection using the new 15-regime system
+        try:
+            # Import the enhanced macro analysis functions with correct path
+            import sys
+            import importlib.util
             
-            print(f"Enhanced data source: Comprehensive macro risk analysis")
-            print(f"Fed Policy Bias: {fed_policy_bias}")
-            print(f"Recession Probability: {recession_prob:.1f}%")
+            analysis_path = os.path.join(os.path.dirname(__file__), '..', 'analysis', '04_macro_economic_analysis.py')
             
-        elif 'Recession_Probability' in macro_data.columns:
-            recession_prob = macro_data['Recession_Probability'].iloc[-1]
-            fed_policy_bias = macro_data.get('Fed_Policy_Bias', pd.Series(['NEUTRAL'])).iloc[-1]
-            print(f"Standard data source: Basic macro analysis")
+            # Use importlib to import module with number prefix
+            spec = importlib.util.spec_from_file_location("macro_economic_analysis", analysis_path)
+            macro_module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(macro_module)
             
-        else:
-            recession_prob = 20.0
-            fed_policy_bias = 'NEUTRAL'
-            print(f"Fallback data source: Default values")
-        
-        # Enhanced market regime logic incorporating Fed policy
-        if recession_prob > 40 or fed_policy_bias == 'STRONGLY_DOVISH':
-            self.market_regime = 'DEFENSIVE'
-        elif recession_prob > 25 or fed_policy_bias in ['DOVISH', 'STRONGLY_HAWKISH']:
-            self.market_regime = 'CAUTIOUS'  
-        else:
-            self.market_regime = 'NORMAL'
-        
-        print(f"Market Regime: {self.market_regime} (Recession: {recession_prob:.1f}%, Fed: {fed_policy_bias})")
-        
-        # Enhanced sector adjustments incorporating Fed policy stance
-        base_adjustments = {
-            'DEFENSIVE': {
-                'Healthcare': 1.15,
-                'Consumer Defensive': 1.10,
-                'Utilities': 1.05,
-                'Technology': 0.90,
-                'Real Estate': 0.85,
-                'Energy': 0.80
-            },
-            'CAUTIOUS': {
-                'Healthcare': 1.05,
-                'Consumer Defensive': 1.03,
-                'Technology': 0.95,
-                'Energy': 0.90
-            },
-            'NORMAL': {},  # No adjustments
-        }
-        
-        # Fed policy overlay adjustments
-        fed_adjustments = {}
-        if fed_policy_bias in ['HAWKISH', 'STRONGLY_HAWKISH']:
-            fed_adjustments.update({
-                'Financial Services': 1.10,  # Banks benefit from higher rates
-                'Real Estate': 0.85,         # REITs hurt by higher rates
-                'Utilities': 0.90            # Interest-sensitive sectors hurt
-            })
-        elif fed_policy_bias in ['DOVISH', 'STRONGLY_DOVISH']:
-            fed_adjustments.update({
-                'Technology': 1.10,          # Growth stocks benefit from lower rates
-                'Real Estate': 1.05,         # REITs benefit from lower rates
-                'Financial Services': 0.90   # Banks hurt by lower rates
-            })
-        
-        # Combine base and Fed policy adjustments
-        adjustments = base_adjustments.get(self.market_regime, {}).copy()
-        for sector, adj in fed_adjustments.items():
-            if sector in adjustments:
-                adjustments[sector] = (adjustments[sector] + adj) / 2  # Average the adjustments
+            # Get current market conditions
+            treasury_rates = macro_module.get_treasury_rates()
+            economic_indicators = macro_module.get_economic_indicators()
+            yield_curve = macro_module.calculate_yield_curve_metrics(treasury_rates)
+            
+            # Run enhanced regime classification
+            regime_analysis = macro_module.classify_market_regime(economic_indicators, yield_curve)
+            enhanced_regime = regime_analysis.get('regime', 'OPTIMISTIC')
+            regime_confidence = regime_analysis.get('confidence', 0.5)
+            regime_characteristics = regime_analysis.get('characteristics', {})
+            
+            print(f"🎯 Enhanced Market Regime: {enhanced_regime} (confidence: {regime_confidence:.0%})")
+            print(f"📊 Regime Description: {regime_characteristics.get('description', 'N/A')}")
+            
+            # Store enhanced regime data
+            self.market_regime = enhanced_regime
+            self.regime_analysis = regime_analysis
+            
+        except Exception as e:
+            print(f"⚠️ Error with enhanced regime detection, falling back to basic: {e}")
+            
+            # Fallback to basic regime detection
+            if hasattr(self, 'risk_data') and 'macro_risk' in self.risk_data:
+                macro_risk = self.risk_data['macro_risk']
+                recession_prob = macro_risk.get('recession_analysis', {}).get('probability', 20)
+                fed_policy_bias = self.risk_data.get('fed_policy', {}).get('overall_assessment', {}).get('policy_bias', 'NEUTRAL')
+            elif 'Recession_Probability' in macro_data.columns:
+                recession_prob = macro_data['Recession_Probability'].iloc[-1]
+                fed_policy_bias = macro_data.get('Fed_Policy_Bias', pd.Series(['NEUTRAL'])).iloc[-1]
             else:
-                adjustments[sector] = adj
+                recession_prob = 20.0
+                fed_policy_bias = 'NEUTRAL'
+            
+            # Basic market regime logic
+            if forced_defensive or recession_prob > 40:
+                self.market_regime = 'DEFENSIVE'
+            elif recession_prob > 25:
+                self.market_regime = 'CAUTIOUS'
+            else:
+                self.market_regime = 'OPTIMISTIC'
+            
+            print(f"📊 Basic Market Regime: {self.market_regime} (Recession: {recession_prob:.1f}%)")
         
-        if adjustments:
-            print("Applying enhanced sector adjustments:")
-            for sector, adjustment in adjustments.items():
+        # FORCE DEFENSIVE MODE if signal detected (overrides normal logic)
+        if forced_defensive:
+            self.market_regime = 'DEFENSIVE'
+            print(f"🛡️ FORCED DEFENSIVE MODE: Immediate rebalancing to defensive allocation")
+        
+        # Enhanced sector adjustments based on new regime system
+        sector_adjustments = self._get_regime_sector_adjustments(self.market_regime)
+        
+        print(f"\n🎯 Applying sector adjustments for {self.market_regime} regime:")
+        for sector, adjustment in sector_adjustments.items():
+            if adjustment != 1.0:
+                print(f"   • {sector}: {adjustment:.2f}x")
+        
+        # Apply sector adjustments to scores and create Macro_Adjusted_Score
+        if 'Combined_Score' in df.columns:
+            df['Macro_Adjusted_Score'] = df['Combined_Score'].copy()
+        else:
+            # Create a combined score if it doesn't exist
+            df['Macro_Adjusted_Score'] = (
+                df.get('Quality Score', 0) * 0.4 + 
+                df.get('Momentum Score', 0) * 0.3 + 
+                df.get('Value Score', 0) * 0.3
+            )
+        
+        # Apply sector adjustments to scores
+        for sector, multiplier in sector_adjustments.items():
+            if sector in df['Sector'].values:
                 mask = df['Sector'] == sector
-                df.loc[mask, 'Quality Score'] *= adjustment
-                df.loc[mask, 'Momentum Score'] *= adjustment
-                df.loc[mask, 'Overall Score'] *= adjustment
-                source = "Fed+Regime" if sector in fed_adjustments else "Regime"
-                print(f"  {sector}: {adjustment:.2f}x ({source})")
-        
-        # Create macro-adjusted composite score
-        df['Macro_Adjusted_Score'] = (
-            df['Quality Score'] * 0.4 +
-            df['Momentum Score'] * 0.3 +
-            df['Overall Score'] * 0.3
-        )
+                # Apply to macro adjusted score and individual scoring metrics
+                df.loc[mask, 'Macro_Adjusted_Score'] *= multiplier
+                if 'Combined_Score' in df.columns:
+                    df.loc[mask, 'Combined_Score'] *= multiplier
+                if 'Quality_Score' in df.columns:
+                    df.loc[mask, 'Quality_Score'] *= multiplier
+                if 'Momentum_Score' in df.columns:
+                    df.loc[mask, 'Momentum_Score'] *= multiplier
+                if 'Value_Score' in df.columns:
+                    df.loc[mask, 'Value_Score'] *= multiplier
         
         return df
+    
+    def _get_regime_sector_adjustments(self, regime: str) -> Dict[str, float]:
+        """Get sector weight adjustments based on market regime"""
+        
+        adjustments = {
+            'OPTIMISTIC': {
+                'Technology': 1.15,
+                'Healthcare': 1.05,
+                'Consumer Discretionary': 1.10,
+                'Industrials': 1.10,
+                'Communication Services': 1.05,
+                'Financial Services': 1.00,
+                'Energy': 0.95,
+                'Utilities': 0.90,
+                'Real Estate': 0.95,
+                'Consumer Defensive': 0.95,
+                'Materials': 1.00
+            },
+            'DEFENSIVE': {
+                'Healthcare': 1.25,
+                'Consumer Defensive': 1.20,
+                'Utilities': 1.15,
+                'Financial Services': 1.05,
+                'Technology': 0.75,
+                'Real Estate': 0.70,
+                'Energy': 0.65,
+                'Consumer Discretionary': 0.80,
+                'Communication Services': 0.85,
+                'Industrials': 0.85,
+                'Materials': 0.80
+            },
+            'CRISIS_MODE': {
+                'Healthcare': 1.30,
+                'Consumer Defensive': 1.25,
+                'Utilities': 1.20,
+                'Technology': 0.70,
+                'Real Estate': 0.65,
+                'Energy': 0.60,
+                'Financial Services': 0.75,
+                'Consumer Discretionary': 0.70,
+                'Communication Services': 0.75,
+                'Industrials': 0.75,
+                'Materials': 0.70
+            },
+            'EARLY_RECOVERY': {
+                'Financial Services': 1.20,
+                'Industrials': 1.15,
+                'Materials': 1.15,
+                'Consumer Discretionary': 1.10,
+                'Technology': 1.05,
+                'Energy': 1.05,
+                'Utilities': 0.80,
+                'Consumer Defensive': 0.85,
+                'Healthcare': 0.95,
+                'Real Estate': 0.90,
+                'Communication Services': 1.00
+            },
+            'LATE_CYCLE': {
+                'Healthcare': 1.20,
+                'Consumer Defensive': 1.15,
+                'Utilities': 1.15,
+                'Technology': 0.85,
+                'Real Estate': 0.80,
+                'Energy': 0.75,
+                'Consumer Discretionary': 0.90,
+                'Financial Services': 0.95,
+                'Industrials': 0.90,
+                'Materials': 0.85,
+                'Communication Services': 0.90
+            },
+            'TECH_DOMINANCE': {
+                'Technology': 1.25,
+                'Communication Services': 1.15,
+                'Consumer Discretionary': 1.10,
+                'Healthcare': 1.05,
+                'Utilities': 0.80,
+                'Consumer Defensive': 0.85,
+                'Energy': 0.85,
+                'Materials': 0.90,
+                'Financial Services': 0.95,
+                'Industrials': 0.95,
+                'Real Estate': 0.90
+            },
+            'HIGH_VOLATILITY': {
+                'Healthcare': 1.15,
+                'Consumer Defensive': 1.15,
+                'Utilities': 1.10,
+                'Technology': 0.85,
+                'Real Estate': 0.80,
+                'Consumer Discretionary': 0.90,
+                'Financial Services': 0.95,
+                'Energy': 0.90,
+                'Industrials': 0.90,
+                'Materials': 0.90,
+                'Communication Services': 0.90
+            },
+            'HIGH_INFLATION': {
+                'Energy': 1.20,
+                'Materials': 1.15,
+                'Real Estate': 1.10,
+                'Financial Services': 1.05,
+                'Technology': 0.80,
+                'Consumer Discretionary': 0.85,
+                'Healthcare': 1.00,
+                'Utilities': 0.95,
+                'Consumer Defensive': 1.00,
+                'Industrials': 1.05,
+                'Communication Services': 0.90
+            },
+            'RISING_RATES': {
+                'Financial Services': 1.20,
+                'Energy': 1.10,
+                'Materials': 1.05,
+                'Technology': 0.85,
+                'Real Estate': 0.75,
+                'Utilities': 0.80,
+                'Healthcare': 1.00,
+                'Consumer Defensive': 1.00,
+                'Consumer Discretionary': 0.95,
+                'Industrials': 1.00,
+                'Communication Services': 0.90
+            }
+        }
+        
+        # Default to balanced approach if regime not found
+        default_adjustments = {sector: 1.0 for sector in [
+            'Technology', 'Healthcare', 'Financial Services', 'Consumer Discretionary',
+            'Industrials', 'Energy', 'Materials', 'Utilities', 'Real Estate',
+            'Consumer Defensive', 'Communication Services'
+        ]}
+        
+        return adjustments.get(regime, default_adjustments)
     
     def _apply_risk_filtering(self, df: pd.DataFrame, risk_data: Dict) -> pd.DataFrame:
         """Apply risk-based filtering and add risk metrics."""

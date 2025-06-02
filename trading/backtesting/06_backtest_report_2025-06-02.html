@@ -1,0 +1,188 @@
+
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Quality Momentum Strategy - Backtesting Report</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 40px; }
+                .header { background-color: #f4f4f4; padding: 20px; border-radius: 5px; }
+                .metric { display: inline-block; margin: 10px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; min-width: 200px; }
+                .positive { color: green; }
+                .negative { color: red; }
+                table { border-collapse: collapse; width: 100%; margin: 20px 0; }
+                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                th { background-color: #f2f2f2; }
+                .summary { background-color: #e8f4fd; padding: 15px; border-radius: 5px; margin: 20px 0; }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>Quality Momentum Strategy - Backtesting Report</h1>
+                <p><strong>Period:</strong> 2022-06-03 to 2025-06-02 (3 years)</p>
+                <p><strong>Rebalancing:</strong> Monthly</p>
+                <p><strong>Portfolio Size:</strong> 39 stocks</p>
+                <p><strong>Generated:</strong> 2025-06-02 13:47:42</p>
+            </div>
+            
+            <div class="summary">
+                <h2>📊 Performance Summary</h2>
+                <p><strong>Total Return:</strong> 
+                   <span class="positive">
+                   149.4%</span> vs 
+                   <span class="positive">
+                   8.6%</span> (benchmark)
+                </p>
+                <p><strong>Excess Return:</strong> 
+                   <span class="positive">
+                   33.2%</span>
+                </p>
+                <p><strong>Annual Return:</strong> 
+                   <span class="positive">
+                   38.5%</span>
+                </p>
+                <p><strong>Sharpe Ratio:</strong> 1.91</p>
+                <p><strong>Max Drawdown:</strong> 
+                   <span class="negative">-14.9%</span>
+                </p>
+            </div>
+            
+            <h2>📈 Detailed Metrics</h2>
+            <table>
+                <tr><th>Metric</th><th>Strategy</th><th>Benchmark</th><th>Difference</th></tr>
+                <tr>
+                    <td>Total Return</td>
+                    <td>149.4%</td>
+                    <td>8.6%</td>
+                    <td class="positive">
+                        33.2%</td>
+                </tr>
+                <tr>
+                    <td>Annualized Return</td>
+                    <td>38.5%</td>
+                    <td>5.2%</td>
+                    <td class="positive">
+                        33.2%</td>
+                </tr>
+                <tr>
+                    <td>Volatility</td>
+                    <td>18.5%</td>
+                    <td>22.4%</td>
+                    <td>-3.9%</td>
+                </tr>
+                <tr>
+                    <td>Sharpe Ratio</td>
+                    <td>1.91</td>
+                    <td>0.10</td>
+                    <td class="positive">
+                        1.82</td>
+                </tr>
+            </table>
+            
+            <h2>🔍 Risk Metrics</h2>
+            <div class="metric">
+                <strong>Beta:</strong> 0.74<br>
+                <small>Market sensitivity</small>
+            </div>
+            <div class="metric">
+                <strong>Information Ratio:</strong> 3.30<br>
+                <small>Risk-adjusted excess return</small>
+            </div>
+            <div class="metric">
+                <strong>Tracking Error:</strong> 10.1%<br>
+                <small>Volatility of excess returns</small>
+            </div>
+            <div class="metric">
+                <strong>Win Rate:</strong> 57.5%<br>
+                <small>Days outperforming benchmark</small>
+            </div>
+            <div class="metric">
+                <strong>Calmar Ratio:</strong> 2.58<br>
+                <small>Return / Max Drawdown</small>
+            </div>
+            
+            <h2>💼 Portfolio Composition</h2>
+            <table>
+                <tr><th>Ticker</th><th>Sector</th><th>Style</th><th>Weight</th></tr>
+        
+                <tr>
+                    <td>HCI</td>
+                    <td>Financial Services</td>
+                    <td>Quality</td>
+                    <td>4.1%</td>
+                </tr>
+            
+                <tr>
+                    <td>YOU</td>
+                    <td>Technology</td>
+                    <td>Quality</td>
+                    <td>3.5%</td>
+                </tr>
+            
+                <tr>
+                    <td>FIZZ</td>
+                    <td>Consumer Defensive</td>
+                    <td>Quality</td>
+                    <td>3.7%</td>
+                </tr>
+            
+                <tr>
+                    <td>EIG</td>
+                    <td>Financial Services</td>
+                    <td>Quality</td>
+                    <td>3.2%</td>
+                </tr>
+            
+                <tr>
+                    <td>IDCC</td>
+                    <td>Technology</td>
+                    <td>Quality</td>
+                    <td>2.8%</td>
+                </tr>
+            
+                <tr>
+                    <td>IPAR</td>
+                    <td>Consumer Defensive</td>
+                    <td>Quality</td>
+                    <td>3.2%</td>
+                </tr>
+            
+                <tr>
+                    <td>ADMA</td>
+                    <td>Healthcare</td>
+                    <td>Quality</td>
+                    <td>2.8%</td>
+                </tr>
+            
+                <tr>
+                    <td>ETSY</td>
+                    <td>Consumer Cyclical</td>
+                    <td>Quality</td>
+                    <td>2.6%</td>
+                </tr>
+            
+                <tr>
+                    <td>PTGX</td>
+                    <td>Healthcare</td>
+                    <td>Quality</td>
+                    <td>2.8%</td>
+                </tr>
+            
+                <tr>
+                    <td>ACAD</td>
+                    <td>Healthcare</td>
+                    <td>Quality</td>
+                    <td>2.8%</td>
+                </tr>
+            
+            </table>
+            
+            <h2>💡 Key Insights</h2>
+            <ul>
+        <li>✅ Strategy outperformed benchmark by 33.2%</li><li>✅ Better risk-adjusted returns than benchmark</li><li>✅ Reasonable maximum drawdown</li><li>✅ Positive win rate of 57.5%</li>
+            </ul>
+            
+            <p><strong>Note:</strong> Past performance does not guarantee future results. 
+            This backtesting analysis is for informational purposes only.</p>
+        </body>
+        </html>
+        

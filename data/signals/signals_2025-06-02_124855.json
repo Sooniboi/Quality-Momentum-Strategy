@@ -1,0 +1,386 @@
+{
+  "metadata": {
+    "generated_at": "2025-06-02T12:48:55.515689",
+    "total_signals": 37,
+    "config": {
+      "min_position_size": 0.01,
+      "max_position_size": 0.05,
+      "rebalance_threshold": 0.02,
+      "max_portfolio_size": 50,
+      "risk_budget": 0.15,
+      "cash_buffer": 0.05
+    }
+  },
+  "signals": {
+    "PBH": {
+      "action": "HOLD",
+      "current_weight": 0.0,
+      "target_weight": 0.01741327733999971,
+      "weight_change": 0.01741327733999971,
+      "signal_strength": 0.0,
+      "quality_score": 0.4549819884420554,
+      "momentum_score": 0.5631817738588565,
+      "timestamp": "2025-06-02T12:48:55.509465"
+    },
+    "BMI": {
+      "action": "BUY",
+      "current_weight": 0.0,
+      "target_weight": 0.02101904885338396,
+      "weight_change": 0.02101904885338396,
+      "signal_strength": 0.4203809770676792,
+      "quality_score": 0.6190144523403479,
+      "momentum_score": 1.415890229281353,
+      "timestamp": "2025-06-02T12:48:55.509667"
+    },
+    "CALM": {
+      "action": "BUY",
+      "current_weight": 0.0,
+      "target_weight": 0.02693051495589592,
+      "weight_change": 0.02693051495589592,
+      "signal_strength": 0.5386102991179184,
+      "quality_score": 1.0804437408866077,
+      "momentum_score": 0.3294010556713175,
+      "timestamp": "2025-06-02T12:48:55.509856"
+    },
+    "HCI": {
+      "action": "BUY",
+      "current_weight": 0.0,
+      "target_weight": 0.039392884457318825,
+      "weight_change": 0.039392884457318825,
+      "signal_strength": 0.7878576891463764,
+      "quality_score": 1.5267240065818288,
+      "momentum_score": 2.82545857326253,
+      "timestamp": "2025-06-02T12:48:55.510048"
+    },
+    "HWKN": {
+      "action": "BUY",
+      "current_weight": 0.0,
+      "target_weight": 0.02362562292801173,
+      "weight_change": 0.02362562292801173,
+      "signal_strength": 0.47251245856023455,
+      "quality_score": 0.8409684623072362,
+      "momentum_score": 1.7409357016126412,
+      "timestamp": "2025-06-02T12:48:55.510208"
+    },
+    "INVA": {
+      "action": "HOLD",
+      "current_weight": 0.0,
+      "target_weight": 0.017684802244177407,
+      "weight_change": 0.017684802244177407,
+      "signal_strength": 0.0,
+      "quality_score": 0.3745749532715213,
+      "momentum_score": 0.8052919741834765,
+      "timestamp": "2025-06-02T12:48:55.510356"
+    },
+    "ECG": {
+      "action": "HOLD",
+      "current_weight": 0.0,
+      "target_weight": 0.01852959303072939,
+      "weight_change": 0.01852959303072939,
+      "signal_strength": 0.0,
+      "quality_score": 0.461870119481814,
+      "momentum_score": 1.163136471564644,
+      "timestamp": "2025-06-02T12:48:55.510500"
+    },
+    "CPRX": {
+      "action": "BUY",
+      "current_weight": 0.0,
+      "target_weight": 0.0223502252934833,
+      "weight_change": 0.0223502252934833,
+      "signal_strength": 0.447004505869666,
+      "quality_score": 0.6900394800474849,
+      "momentum_score": 0.8746433362695455,
+      "timestamp": "2025-06-02T12:48:55.510653"
+    },
+    "IPAR": {
+      "action": "BUY",
+      "current_weight": 0.0,
+      "target_weight": 0.029977053160457276,
+      "weight_change": 0.029977053160457276,
+      "signal_strength": 0.5995410632091455,
+      "quality_score": 1.386666754575381,
+      "momentum_score": 0.0959556221472158,
+      "timestamp": "2025-06-02T12:48:55.510800"
+    },
+    "ARI": {
+      "action": "BUY",
+      "current_weight": 0.0,
+      "target_weight": 0.023525502211668232,
+      "weight_change": 0.023525502211668232,
+      "signal_strength": 0.4705100442333646,
+      "quality_score": 0.6711879707783844,
+      "momentum_score": 1.2283033027408976,
+      "timestamp": "2025-06-02T12:48:55.511023"
+    },
+    "CNK": {
+      "action": "BUY",
+      "current_weight": 0.0,
+      "target_weight": 0.02356716467795758,
+      "weight_change": 0.02356716467795758,
+      "signal_strength": 0.4713432935591516,
+      "quality_score": 0.8154190083021328,
+      "momentum_score": 1.2741637107093475,
+      "timestamp": "2025-06-02T12:48:55.511187"
+    },
+    "EPAC": {
+      "action": "HOLD",
+      "current_weight": 0.0,
+      "target_weight": 0.016745961754724148,
+      "weight_change": 0.016745961754724148,
+      "signal_strength": 0.0,
+      "quality_score": 0.7934268512194156,
+      "momentum_score": -0.0955411676508006,
+      "timestamp": "2025-06-02T12:48:55.511334"
+    },
+    "ALKS": {
+      "action": "BUY",
+      "current_weight": 0.0,
+      "target_weight": 0.023588075192023487,
+      "weight_change": 0.023588075192023487,
+      "signal_strength": 0.4717615038404697,
+      "quality_score": 1.01087523186951,
+      "momentum_score": 0.3374622852001603,
+      "timestamp": "2025-06-02T12:48:55.511477"
+    },
+    "CRVL": {
+      "action": "BUY",
+      "current_weight": 0.0,
+      "target_weight": 0.0447732208218637,
+      "weight_change": 0.0447732208218637,
+      "signal_strength": 0.8954644164372739,
+      "quality_score": 2.963462008647922,
+      "momentum_score": 0.2430948100033322,
+      "timestamp": "2025-06-02T12:48:55.511615"
+    },
+    "PRDO": {
+      "action": "BUY",
+      "current_weight": 0.0,
+      "target_weight": 0.03465655796325524,
+      "weight_change": 0.03465655796325524,
+      "signal_strength": 0.6931311592651047,
+      "quality_score": 1.2117875407666805,
+      "momentum_score": 1.3186833976116206,
+      "timestamp": "2025-06-02T12:48:55.511756"
+    },
+    "FIZZ": {
+      "action": "BUY",
+      "current_weight": 0.0,
+      "target_weight": 0.035198202224368653,
+      "weight_change": 0.035198202224368653,
+      "signal_strength": 0.703964044487373,
+      "quality_score": 1.7258649969532864,
+      "momentum_score": 0.357956123558815,
+      "timestamp": "2025-06-02T12:48:55.511898"
+    },
+    "YOU": {
+      "action": "BUY",
+      "current_weight": 0.0,
+      "target_weight": 0.03287084432056194,
+      "weight_change": 0.03287084432056194,
+      "signal_strength": 0.6574168864112387,
+      "quality_score": 1.993805954567612,
+      "momentum_score": 0.6022780687910746,
+      "timestamp": "2025-06-02T12:48:55.512044"
+    },
+    "ATGE": {
+      "action": "BUY",
+      "current_weight": 0.0,
+      "target_weight": 0.030793338379574826,
+      "weight_change": 0.030793338379574826,
+      "signal_strength": 0.6158667675914965,
+      "quality_score": 0.6850879488008617,
+      "momentum_score": 1.6574114270568563,
+      "timestamp": "2025-06-02T12:48:55.512180"
+    },
+    "IDCC": {
+      "action": "BUY",
+      "current_weight": 0.0,
+      "target_weight": 0.026572291184532366,
+      "weight_change": 0.026572291184532366,
+      "signal_strength": 0.5314458236906473,
+      "quality_score": 1.3122435664055718,
+      "momentum_score": 0.8477565851977595,
+      "timestamp": "2025-06-02T12:48:55.512317"
+    },
+    "ADEA": {
+      "action": "HOLD",
+      "current_weight": 0.0,
+      "target_weight": 0.016706617122369385,
+      "weight_change": 0.016706617122369385,
+      "signal_strength": 0.0,
+      "quality_score": 0.7236187401197175,
+      "momentum_score": 0.1993101526930126,
+      "timestamp": "2025-06-02T12:48:55.512454"
+    },
+    "OTTR": {
+      "action": "BUY",
+      "current_weight": 0.0,
+      "target_weight": 0.029839600477654632,
+      "weight_change": 0.029839600477654632,
+      "signal_strength": 0.5967920095530926,
+      "quality_score": 1.3693293440027678,
+      "momentum_score": -0.1646694960836428,
+      "timestamp": "2025-06-02T12:48:55.513002"
+    },
+    "ETSY": {
+      "action": "BUY",
+      "current_weight": 0.0,
+      "target_weight": 0.02495864594957687,
+      "weight_change": 0.02495864594957687,
+      "signal_strength": 0.4991729189915374,
+      "quality_score": 1.3664622866870977,
+      "momentum_score": 0.6348341397819247,
+      "timestamp": "2025-06-02T12:48:55.513146"
+    },
+    "SPSC": {
+      "action": "HOLD",
+      "current_weight": 0.0,
+      "target_weight": 0.010433185058733767,
+      "weight_change": 0.010433185058733767,
+      "signal_strength": 0.0,
+      "quality_score": 0.330455836521166,
+      "momentum_score": 0.1816649309153802,
+      "timestamp": "2025-06-02T12:48:55.513351"
+    },
+    "CORT": {
+      "action": "BUY",
+      "current_weight": 0.0,
+      "target_weight": 0.025344732687292836,
+      "weight_change": 0.025344732687292836,
+      "signal_strength": 0.5068946537458566,
+      "quality_score": 0.5519741855103425,
+      "momentum_score": 1.6716428065905655,
+      "timestamp": "2025-06-02T12:48:55.513489"
+    },
+    "AWI": {
+      "action": "BUY",
+      "current_weight": 0.0,
+      "target_weight": 0.02311181441273058,
+      "weight_change": 0.02311181441273058,
+      "signal_strength": 0.4622362882546116,
+      "quality_score": 1.0976377103522117,
+      "momentum_score": 0.3224595723081514,
+      "timestamp": "2025-06-02T12:48:55.513629"
+    },
+    "EIG": {
+      "action": "BUY",
+      "current_weight": 0.0,
+      "target_weight": 0.030498061154214058,
+      "weight_change": 0.030498061154214058,
+      "signal_strength": 0.6099612230842811,
+      "quality_score": 1.8501598946905464,
+      "momentum_score": 0.0623541662017183,
+      "timestamp": "2025-06-02T12:48:55.513764"
+    },
+    "ACAD": {
+      "action": "BUY",
+      "current_weight": 0.0,
+      "target_weight": 0.02613611263549944,
+      "weight_change": 0.02613611263549944,
+      "signal_strength": 0.5227222527099887,
+      "quality_score": 0.6479569760487611,
+      "momentum_score": 1.505463551808011,
+      "timestamp": "2025-06-02T12:48:55.513899"
+    },
+    "FTDR": {
+      "action": "HOLD",
+      "current_weight": 0.0,
+      "target_weight": 0.01906257593861881,
+      "weight_change": 0.01906257593861881,
+      "signal_strength": 0.0,
+      "quality_score": 0.7312523308752358,
+      "momentum_score": 1.002377672920013,
+      "timestamp": "2025-06-02T12:48:55.514033"
+    },
+    "WDFC": {
+      "action": "HOLD",
+      "current_weight": 0.0,
+      "target_weight": 0.01852641237786151,
+      "weight_change": 0.01852641237786151,
+      "signal_strength": 0.0,
+      "quality_score": 0.8412472751954555,
+      "momentum_score": 0.6161187946693631,
+      "timestamp": "2025-06-02T12:48:55.514176"
+    },
+    "LRN": {
+      "action": "BUY",
+      "current_weight": 0.0,
+      "target_weight": 0.0287931297439884,
+      "weight_change": 0.0287931297439884,
+      "signal_strength": 0.575862594879768,
+      "quality_score": 0.697923226716265,
+      "momentum_score": 1.1745954843636548,
+      "timestamp": "2025-06-02T12:48:55.514460"
+    },
+    "ACT": {
+      "action": "HOLD",
+      "current_weight": 0.0,
+      "target_weight": 0.016438507752283206,
+      "weight_change": 0.016438507752283206,
+      "signal_strength": 0.0,
+      "quality_score": 0.422479039116463,
+      "momentum_score": 0.7365020612258392,
+      "timestamp": "2025-06-02T12:48:55.514602"
+    },
+    "INSW": {
+      "action": "HOLD",
+      "current_weight": 0.0,
+      "target_weight": 0.017810122736837256,
+      "weight_change": 0.017810122736837256,
+      "signal_strength": 0.0,
+      "quality_score": 0.7085958006678984,
+      "momentum_score": 1.026165585582851,
+      "timestamp": "2025-06-02T12:48:55.514738"
+    },
+    "TGNA": {
+      "action": "BUY",
+      "current_weight": 0.0,
+      "target_weight": 0.028346998156687918,
+      "weight_change": 0.028346998156687918,
+      "signal_strength": 0.5669399631337583,
+      "quality_score": 1.5492625728932812,
+      "momentum_score": 0.338239025493376,
+      "timestamp": "2025-06-02T12:48:55.514877"
+    },
+    "STRL": {
+      "action": "BUY",
+      "current_weight": 0.0,
+      "target_weight": 0.022367206984842757,
+      "weight_change": 0.022367206984842757,
+      "signal_strength": 0.4473441396968551,
+      "quality_score": 0.6752251489157005,
+      "momentum_score": 1.4200117238836965,
+      "timestamp": "2025-06-02T12:48:55.515013"
+    },
+    "ADMA": {
+      "action": "BUY",
+      "current_weight": 0.0,
+      "target_weight": 0.026788580327480816,
+      "weight_change": 0.026788580327480816,
+      "signal_strength": 0.5357716065496163,
+      "quality_score": 1.0434114566632735,
+      "momentum_score": 1.002316490450364,
+      "timestamp": "2025-06-02T12:48:55.515146"
+    },
+    "YELP": {
+      "action": "BUY",
+      "current_weight": 0.0,
+      "target_weight": 0.02359325413325557,
+      "weight_change": 0.02359325413325557,
+      "signal_strength": 0.4718650826651114,
+      "quality_score": 0.8778598979810653,
+      "momentum_score": 1.01006612614777,
+      "timestamp": "2025-06-02T12:48:55.515280"
+    },
+    "PTGX": {
+      "action": "BUY",
+      "current_weight": 0.0,
+      "target_weight": 0.026343311257170758,
+      "weight_change": 0.026343311257170758,
+      "signal_strength": 0.5268662251434151,
+      "quality_score": 0.8923312995896134,
+      "momentum_score": 1.2247183127812589,
+      "timestamp": "2025-06-02T12:48:55.515415"
+    }
+  }
+}

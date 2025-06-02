@@ -1,0 +1,14 @@
+{
+  "timestamp": "2025-06-02_133547",
+  "regime": "NORMAL",
+  "indicators": {
+    "vix": 19.18,
+    "yield_10y": 4.43,
+    "yield_2y": 3.92,
+    "fed_rate": 4.33,
+    "inflation": 320.321,
+    "gdp_growth": 23528.047,
+    "unemployment": 4.2,
+    "yield_curve": 0.5099999999999998
+  }
+}

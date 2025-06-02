@@ -1,0 +1,33 @@
+{
+  "construction_date": "2025-06-02T17:00:17.283280",
+  "system_type": "unified_portfolio_construction",
+  "market_regime": "HIGH_INFLATION",
+  "target_size": 50,
+  "actual_size": 38,
+  "metrics": {
+    "portfolio_quality": 1.0899348516669503,
+    "portfolio_momentum": 0.894798892238877,
+    "portfolio_volatility": 0.04341054337397305,
+    "portfolio_beta": 1.0968765886635758,
+    "style_distribution": {
+      "Blend": 0.17299356981946515,
+      "Growth": 0.04856019846338963,
+      "Quality": 0.5484090933646805,
+      "Value": 0.2300371383524646
+    },
+    "sector_distribution": {
+      "Basic Materials": 0.024039849406985468,
+      "Communication Services": 0.07794731181528838,
+      "Consumer Cyclical": 0.049201718812112806,
+      "Consumer Defensive": 0.19890138219688305,
+      "Energy": 0.038676232039209765,
+      "Financial Services": 0.1555006160830545,
+      "Healthcare": 0.2143584250202571,
+      "Industrials": 0.0876875374304506,
+      "Real Estate": 0.026205375424411696,
+      "Technology": 0.09698860743663443,
+      "Utilities": 0.030492944334712044
+    },
+    "market_regime": "HIGH_INFLATION"
+  }
+}

@@ -1,0 +1,74 @@
+MONTE CARLO PORTFOLIO ANALYSIS REPORT
+============================================================
+Analysis Date: 2025-06-02 15:13:33
+Portfolio: 38 stocks
+Simulations: 10,000
+Time Horizon: 252 days
+Market Regime: NORMAL
+
+PORTFOLIO COMPOSITION:
+Quality Allocation: 55.0%
+Growth Allocation: 4.8%
+Value Allocation: 23.0%
+Blend Allocation: 17.2%
+
+RISK METRICS:
+Expected Return: 10.4%
+Volatility: 13.2%
+Sharpe Ratio: 0.41
+
+VALUE AT RISK:
+VaR (95%): -10.0%
+VaR (99%): -16.4%
+CVaR (95%): -14.0%
+CVaR (99%): -19.8%
+
+DRAWDOWN ANALYSIS:
+Average Max Drawdown: -10.2%
+95th Percentile Max Drawdown: -5.3%
+
+RETURN DISTRIBUTION:
+10th Percentile: -5.9%
+25th Percentile: 1.0%
+75th Percentile: 18.8%
+90th Percentile: 27.8%
+
+PROBABILITIES:
+Probability of Positive Return: 77.7%
+Probability of Beating Market: 55.0%
+
+STRESS TEST RESULTS:
+MARKET_CRASH:
+  2008-style market crash (-40% market)
+  Portfolio Return: -45.0%
+  Relative to Market: -5.0%
+
+RECESSION:
+  Economic recession (-25% market)
+  Portfolio Return: -28.2%
+  Relative to Market: -3.2%
+
+INFLATION_SHOCK:
+  Inflation shock (high rates)
+  Portfolio Return: -16.9%
+  Relative to Market: -1.9%
+
+SECTOR_ROTATION:
+  Major sector rotation
+  Portfolio Return: -5.6%
+  Relative to Market: -0.6%
+
+TOP HOLDINGS ANALYSIS:
+  CRVL (Financial Services) - 4.8% - Blend
+  HCI (Financial Services) - 4.1% - Quality
+  FIZZ (Consumer Defensive) - 3.7% - Quality
+  PRDO (Consumer Defensive) - 3.7% - Blend
+  YOU (Technology) - 3.4% - Quality
+  ATGE (Consumer Defensive) - 3.3% - Blend
+  EIG (Financial Services) - 3.2% - Quality
+  IPAR (Consumer Defensive) - 3.2% - Quality
+  OTTR (Utilities) - 3.0% - Value
+  TGNA (Communication Services) - 3.0% - Value
+
+RISK WARNINGS:
+✅ No major risk warnings identified

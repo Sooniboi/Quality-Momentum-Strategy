@@ -35,8 +35,8 @@ API_KEY = os.getenv("FMP_API_KEY")
 # Get your free FRED API key at: https://fred.stlouisfed.org/docs/api/api_key.html
 # FRED_API_KEY = "your_fred_api_key_here"  # <-- ADD YOUR KEY HERE
 
-# For now, using None will trigger fallback methods
-FRED_API_KEY = None  # Set to your FRED API key when available
+# Use environment variable for FRED API key
+FRED_API_KEY = os.getenv("FRED_API_KEY")  # Load from environment variable
 
 # =============================================================================
 # FRED DATA INTEGRATION - Official Federal Reserve Data
@@ -81,7 +81,20 @@ def get_fred_economic_data() -> Dict:
         'housing_starts': 'HOUST',              # Housing Starts
         'industrial_production': 'INDPRO',     # Industrial Production Index
         'capacity_utilization': 'TCU',         # Capacity Utilization
-        'ism_manufacturing': 'ISRATIO'          # ISM Manufacturing PMI
+        'ism_manufacturing': 'ISRATIO',         # ISM Manufacturing PMI
+        # =============================================================================
+        # ENHANCED MARKET REGIME INDICATORS - Added for 15-regime system
+        # =============================================================================
+        'vix_index': 'VIXCLS',                  # Market volatility/fear gauge
+        'money_supply_m2': 'M2SL',              # Money supply for liquidity analysis
+        'tips_10y': 'DFII10',                   # 10Y TIPS for inflation expectations
+        'corporate_aaa': 'DAAA',                # AAA corporate bond yields
+        'corporate_baa': 'DBAA',                # BAA corporate bond yields  
+        'gdp_deflator': 'GDPDEF',               # GDP deflator for inflation
+        'personal_income': 'PI',                # Personal income trends
+        'retail_sales': 'RSAFS',                # Retail sales momentum
+        'durable_goods': 'DGORDER',             # Durable goods orders
+        'business_inventories': 'BUSINV'        # Business inventory levels
     }
     
     # Fallback CSV endpoints for when no API key
@@ -332,6 +345,108 @@ def analyze_fed_policy_stance(fred_data: Dict) -> Dict:
         analysis['error'] = str(e)
     
     return analysis
+
+# =============================================================================
+# FMP API INTEGRATION - Enhanced Market Data for Regime Detection
+# =============================================================================
+
+def get_fmp_market_data() -> Dict:
+    """Get enhanced market data from FMP API for regime detection"""
+    print("📊 Fetching FMP market data...")
+    
+    if not API_KEY:
+        print("⚠️ FMP API key not found, using fallback data")
+        return get_fallback_market_data()
+    
+    market_data = {}
+    
+    try:
+        # 1. VIX Volatility Index
+        vix_url = f'https://financialmodelingprep.com/api/v3/quote/^VIX?apikey={API_KEY}'
+        response = requests.get(vix_url, timeout=10)
+        if response.status_code == 200:
+            vix_data = response.json()
+            if vix_data and len(vix_data) > 0:
+                vix = vix_data[0]
+                market_data['vix'] = {
+                    'current': vix.get('price', 20.0),
+                    'change': vix.get('change', 0.0),
+                    'source': 'FMP_API'
+                }
+            else:
+                market_data['vix'] = {'current': 20.0, 'source': 'FALLBACK'}
+        else:
+            market_data['vix'] = {'current': 20.0, 'source': 'FALLBACK'}
+        
+        time.sleep(0.2)  # Rate limiting
+        
+        # 2. Sector Performance
+        sector_url = f'https://financialmodelingprep.com/api/v3/sectors-performance?apikey={API_KEY}'
+        response = requests.get(sector_url, timeout=10)
+        if response.status_code == 200:
+            sector_data = response.json()
+            if sector_data and len(sector_data) > 0:
+                sectors = {}
+                for sector in sector_data:
+                    sector_name = sector.get('sector', 'Unknown')
+                    sector_change = sector.get('changesPercentage', '0%')
+                    
+                    try:
+                        if isinstance(sector_change, str):
+                            sector_change = float(sector_change.rstrip('%'))
+                        else:
+                            sector_change = float(sector_change)
+                    except (ValueError, TypeError):
+                        sector_change = 0.0
+                    
+                    sectors[sector_name] = {
+                        'change_percent': sector_change,
+                        'source': 'FMP_API'
+                    }
+                
+                market_data['sectors'] = sectors
+                
+                # Find leading sector
+                if sectors:
+                    leading_sector = max(sectors.items(), key=lambda x: x[1]['change_percent'])
+                    market_data['leading_sector'] = {
+                        'name': leading_sector[0],
+                        'performance': leading_sector[1]['change_percent']
+                    }
+            else:
+                market_data['sectors'] = get_fallback_sectors()
+        else:
+            market_data['sectors'] = get_fallback_sectors()
+        
+    except Exception as e:
+        print(f"❌ Error fetching FMP market data: {e}")
+        return get_fallback_market_data()
+    
+    return market_data
+
+def get_fallback_market_data() -> Dict:
+    """Fallback market data when FMP API is unavailable"""
+    return {
+        'vix': {'current': 20.0, 'source': 'FALLBACK'},
+        'sectors': get_fallback_sectors(),
+        'leading_sector': {'name': 'Technology', 'performance': 1.0}
+    }
+
+def get_fallback_sectors() -> Dict:
+    """Fallback sector performance data"""
+    return {
+        'Technology': {'change_percent': 1.0, 'source': 'FALLBACK'},
+        'Healthcare': {'change_percent': 0.5, 'source': 'FALLBACK'},
+        'Financials': {'change_percent': 0.3, 'source': 'FALLBACK'},
+        'Consumer Discretionary': {'change_percent': 0.2, 'source': 'FALLBACK'},
+        'Industrials': {'change_percent': 0.1, 'source': 'FALLBACK'},
+        'Energy': {'change_percent': -0.2, 'source': 'FALLBACK'},
+        'Materials': {'change_percent': -0.1, 'source': 'FALLBACK'},
+        'Utilities': {'change_percent': -0.3, 'source': 'FALLBACK'},
+        'Real Estate': {'change_percent': -0.4, 'source': 'FALLBACK'},
+        'Consumer Staples': {'change_percent': 0.0, 'source': 'FALLBACK'},
+        'Communication Services': {'change_percent': 0.1, 'source': 'FALLBACK'}
+    }
 
 def get_treasury_rates() -> Dict:
     """Get current treasury rates - enhanced with FRED data when available"""
@@ -883,313 +998,403 @@ def classify_interest_rate_environment(treasury_rates: Dict) -> Dict:
     }
 
 def classify_market_regime(economic_indicators: Dict, yield_curve: Dict) -> Dict:
-    """Classify the overall market regime with enhanced precision."""
-    vix = economic_indicators.get('vix', 20)
-    curve_shape = yield_curve.get('curve_shape', 'Normal')
+    """Enhanced market regime classification with 15 distinct regimes."""
+    print("🔍 Analyzing enhanced market regime...")
+    
+    # Get enhanced data
+    fred_data = get_fred_economic_data()
+    market_data = get_fmp_market_data()
+    
+    # Extract key indicators
+    vix = market_data.get('vix', {}).get('current', 20.0)
     curve_2s10s_bps = yield_curve.get('curve_2s10s_bps', 50)
+    unemployment = fred_data.get('unemployment_rate', {}).get('current', 4.2)
+    gdp_growth = calculate_gdp_growth(fred_data)
+    inflation_rate = fred_data.get('core_pce_inflation', {}).get('current', 2.1)
+    fed_funds = fred_data.get('fed_funds_rate', {}).get('current', 4.33)
     
-    # Market volatility assessment with more granular thresholds
-    if vix < 12:
-        volatility_regime = "Very Low Volatility"
-        risk_appetite = "Very High"
-    elif vix < 16:
-        volatility_regime = "Low Volatility"
-        risk_appetite = "High"
-    elif vix < 20:
-        volatility_regime = "Normal Volatility"
-        risk_appetite = "Moderate"
-    elif vix < 30:
-        volatility_regime = "Elevated Volatility"
-        risk_appetite = "Low"
-    elif vix < 40:
-        volatility_regime = "High Volatility"
-        risk_appetite = "Very Low"
+    # Sector performance analysis
+    sectors = market_data.get('sectors', {})
+    tech_performance = sectors.get('Technology', {}).get('change_percent', 0)
+    leading_sector = market_data.get('leading_sector', {})
+    
+    # =============================================================================
+    # ENHANCED REGIME DETECTION LOGIC
+    # =============================================================================
+    
+    regime = 'OPTIMISTIC'  # Default
+    confidence = 0.5
+    signals = []
+    regime_factors = {}
+    
+    # 1. CRISIS & HIGH VOLATILITY REGIMES
+    if vix >= 35:
+        regime = 'CRISIS_MODE'
+        confidence = 0.9
+        signals.append(f"Crisis volatility: VIX {vix:.1f}")
+        regime_factors['volatility'] = 'CRISIS'
+    elif vix >= 25:
+        regime = 'HIGH_VOLATILITY'
+        confidence = 0.8
+        signals.append(f"High volatility: VIX {vix:.1f}")
+        regime_factors['volatility'] = 'HIGH'
     else:
-        volatility_regime = "Crisis Volatility"
-        risk_appetite = "Risk-Off"
+        regime_factors['volatility'] = 'NORMAL' if vix < 20 else 'ELEVATED'
     
-    # Economic cycle assessment based on yield curve in bps
-    if curve_2s10s_bps < -50:  # Deeply inverted
-        economic_cycle = "Late Cycle/Imminent Recession"
-    elif curve_2s10s_bps < -10:  # Mildly inverted
-        economic_cycle = "Late Cycle/Recession Risk"
-    elif curve_2s10s_bps < 30:  # Flat
-        economic_cycle = "Mid-Late Cycle"
-    elif curve_2s10s_bps < 150:  # Normal
-        economic_cycle = "Mid Cycle"
-    else:  # Very steep
-        economic_cycle = "Early Cycle/Recovery"
+    # 2. RECESSION DETECTION
+    if curve_2s10s_bps < -50 and unemployment > 4.5:
+        if regime not in ['CRISIS_MODE']:
+            regime = 'LATE_CYCLE'
+            confidence = 0.85
+            signals.append(f"Deep inversion + rising unemployment")
+    elif curve_2s10s_bps < -20:
+        if regime not in ['CRISIS_MODE', 'HIGH_VOLATILITY']:
+            regime = 'LATE_CYCLE'
+            confidence = 0.75
+            signals.append(f"Yield curve inversion: {curve_2s10s_bps:.0f} bps")
     
-    return {
-        'volatility_regime': volatility_regime,
-        'risk_appetite': risk_appetite,
-        'economic_cycle': economic_cycle,
-        'overall_regime': f"{economic_cycle} - {volatility_regime}",
-        'vix_level': vix,
-        'curve_2s10s_bps': curve_2s10s_bps
+    # 3. EARLY RECOVERY DETECTION
+    if (curve_2s10s_bps > 150 and unemployment > 6.0 and gdp_growth < 1.0 
+        and regime not in ['CRISIS_MODE', 'HIGH_VOLATILITY', 'LATE_CYCLE']):
+        regime = 'EARLY_RECOVERY'
+        confidence = 0.8
+        signals.append(f"Steep curve + high unemployment suggests early recovery")
+        regime_factors['cycle'] = 'EARLY_RECOVERY'
+    
+    # 4. TECH DOMINANCE DETECTION
+    if (tech_performance > 2.0 and vix < 25 
+        and regime not in ['CRISIS_MODE', 'HIGH_VOLATILITY', 'LATE_CYCLE', 'EARLY_RECOVERY']):
+        regime = 'TECH_DOMINANCE'
+        confidence = 0.7
+        signals.append(f"Technology sector leadership: +{tech_performance:.1f}%")
+        regime_factors['sector_leadership'] = 'TECHNOLOGY'
+    
+    # 5. INFLATION REGIMES
+    if inflation_rate > 4.0:
+        if regime not in ['CRISIS_MODE', 'HIGH_VOLATILITY']:
+            regime = 'HIGH_INFLATION'
+            confidence = 0.8
+            signals.append(f"High inflation: {inflation_rate:.1f}%")
+        regime_factors['inflation'] = 'HIGH'
+    elif inflation_rate < 1.0:
+        regime_factors['inflation'] = 'LOW'
+    else:
+        regime_factors['inflation'] = 'MODERATE'
+    
+    # 6. INTEREST RATE REGIMES
+    if fed_funds > 5.5:
+        regime_factors['rates'] = 'HIGH'
+        if regime not in ['CRISIS_MODE', 'HIGH_VOLATILITY', 'HIGH_INFLATION']:
+            regime = 'RISING_RATES'
+            confidence = 0.75
+            signals.append(f"High fed funds rate: {fed_funds:.2f}%")
+    elif fed_funds < 1.0:
+        regime_factors['rates'] = 'LOW'
+    else:
+        regime_factors['rates'] = 'MODERATE'
+    
+    # 7. DEFAULT TO OPTIMISTIC IF NO STRONG SIGNALS
+    if regime == 'OPTIMISTIC' and vix < 20 and curve_2s10s_bps > 50:
+        confidence = 0.6
+        signals.append("Normal market conditions")
+    
+    # 8. DEFENSIVE OVERRIDE (from external signals)
+    defensive_signal_path = "data/processed/temp_signals/defensive_mode.json"
+    if os.path.exists(defensive_signal_path):
+        try:
+            with open(defensive_signal_path, 'r') as f:
+                defensive_signal = json.load(f)
+                if defensive_signal.get('force_defensive', False):
+                    regime = 'DEFENSIVE'
+                    confidence = 0.95
+                    signals.append("External defensive signal detected")
+        except Exception as e:
+            print(f"⚠️ Error reading defensive signal: {e}")
+    
+    # =============================================================================
+    # REGIME CHARACTERISTICS
+    # =============================================================================
+    
+    regime_characteristics = get_regime_characteristics(regime)
+    
+    # Calculate regime score
+    regime_score = calculate_regime_score(regime, vix, curve_2s10s_bps, inflation_rate, fed_funds)
+    
+    result = {
+        'regime': regime,
+        'confidence': confidence,
+        'regime_score': regime_score,
+        'signals': signals,
+        'characteristics': regime_characteristics,
+        'regime_factors': regime_factors,
+        'market_conditions': {
+            'vix': vix,
+            'yield_curve_bps': curve_2s10s_bps,
+            'unemployment': unemployment,
+            'inflation': inflation_rate,
+            'fed_funds': fed_funds,
+            'gdp_growth': gdp_growth,
+            'tech_performance': tech_performance,
+            'leading_sector': leading_sector.get('name', 'Unknown')
+        },
+        'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     }
+    
+    print(f"🎯 Market Regime: {regime} (confidence: {confidence:.0%})")
+    for signal in signals[:3]:  # Show top 3 signals
+        print(f"   • {signal}")
+    
+    return result
+
+def calculate_gdp_growth(fred_data: Dict) -> float:
+    """Calculate estimated GDP growth rate"""
+    try:
+        # Try to get recent GDP data
+        if 'real_gdp' in fred_data:
+            current_gdp = fred_data['real_gdp']['current']
+            previous_gdp = fred_data['real_gdp'].get('previous')
+            if previous_gdp:
+                growth_rate = ((current_gdp - previous_gdp) / previous_gdp) * 100
+                return growth_rate
+        
+        # Fallback: estimate from other indicators
+        unemployment = fred_data.get('unemployment_rate', {}).get('current', 4.2)
+        industrial_prod = fred_data.get('industrial_production', {}).get('current', 100)
+        
+        # Rough estimate: lower unemployment and higher production = higher growth
+        estimated_growth = 3.0 - (unemployment - 3.5) * 0.5
+        return max(-2.0, min(6.0, estimated_growth))  # Clamp between -2% and 6%
+        
+    except Exception as e:
+        print(f"⚠️ Error calculating GDP growth: {e}")
+        return 2.5  # Default moderate growth
+
+def get_regime_characteristics(regime: str) -> Dict:
+    """Get detailed characteristics for each market regime"""
+    characteristics = {
+        'OPTIMISTIC': {
+            'description': 'Normal bull market conditions',
+            'risk_level': 'MODERATE',
+            'growth_tilt': 0.1,
+            'sector_adjustments': {},
+            'volatility_target': 0.15
+        },
+        'DEFENSIVE': {
+            'description': 'Bear market or defensive positioning required',
+            'risk_level': 'LOW',
+            'growth_tilt': -0.2,
+            'sector_adjustments': {
+                'Healthcare': 0.20,
+                'Consumer Defensive': 0.15,
+                'Utilities': 0.10,
+                'Technology': -0.20,
+                'Real Estate': -0.25,
+                'Energy': -0.30
+            },
+            'volatility_target': 0.12
+        },
+        'CRISIS_MODE': {
+            'description': 'Market crisis with extreme volatility',
+            'risk_level': 'VERY_LOW',
+            'growth_tilt': -0.3,
+            'sector_adjustments': {
+                'Healthcare': 0.25,
+                'Consumer Defensive': 0.20,
+                'Utilities': 0.15,
+                'Technology': -0.25,
+                'Real Estate': -0.30,
+                'Energy': -0.35,
+                'Financials': -0.20
+            },
+            'volatility_target': 0.10
+        },
+        'EARLY_RECOVERY': {
+            'description': 'Early economic recovery phase',
+            'risk_level': 'MODERATE',
+            'growth_tilt': 0.15,
+            'sector_adjustments': {
+                'Financials': 0.15,
+                'Industrials': 0.10,
+                'Materials': 0.10,
+                'Consumer Discretionary': 0.05,
+                'Utilities': -0.15,
+                'Consumer Defensive': -0.10
+            },
+            'volatility_target': 0.16
+        },
+        'LATE_CYCLE': {
+            'description': 'Late economic cycle with recession risk',
+            'risk_level': 'LOW',
+            'growth_tilt': -0.15,
+            'sector_adjustments': {
+                'Healthcare': 0.15,
+                'Consumer Defensive': 0.10,
+                'Utilities': 0.10,
+                'Technology': -0.10,
+                'Real Estate': -0.15,
+                'Energy': -0.20
+            },
+            'volatility_target': 0.13
+        },
+        'TECH_DOMINANCE': {
+            'description': 'Technology sector leadership regime',
+            'risk_level': 'MODERATE_HIGH',
+            'growth_tilt': 0.25,
+            'sector_adjustments': {
+                'Technology': 0.20,
+                'Communication Services': 0.10,
+                'Consumer Discretionary': 0.05,
+                'Utilities': -0.15,
+                'Consumer Defensive': -0.10,
+                'Energy': -0.10
+            },
+            'volatility_target': 0.17
+        },
+        'HIGH_VOLATILITY': {
+            'description': 'Elevated market volatility regime',
+            'risk_level': 'LOW',
+            'growth_tilt': -0.1,
+            'sector_adjustments': {
+                'Healthcare': 0.10,
+                'Consumer Defensive': 0.10,
+                'Utilities': 0.05,
+                'Technology': -0.10,
+                'Real Estate': -0.15
+            },
+            'volatility_target': 0.12
+        },
+        'HIGH_INFLATION': {
+            'description': 'High inflation environment',
+            'risk_level': 'MODERATE',
+            'growth_tilt': 0.0,
+            'sector_adjustments': {
+                'Energy': 0.15,
+                'Materials': 0.10,
+                'Real Estate': 0.05,
+                'Technology': -0.15,
+                'Consumer Discretionary': -0.10
+            },
+            'volatility_target': 0.16
+        },
+        'RISING_RATES': {
+            'description': 'Rising interest rate environment',
+            'risk_level': 'MODERATE',
+            'growth_tilt': -0.05,
+            'sector_adjustments': {
+                'Financials': 0.15,
+                'Energy': 0.05,
+                'Technology': -0.10,
+                'Real Estate': -0.20,
+                'Utilities': -0.15
+            },
+            'volatility_target': 0.15
+        }
+    }
+    
+    return characteristics.get(regime, characteristics['OPTIMISTIC'])
+
+def calculate_regime_score(regime: str, vix: float, curve_bps: float, inflation: float, fed_funds: float) -> float:
+    """Calculate a numerical score for regime strength"""
+    base_scores = {
+        'OPTIMISTIC': 0.7,
+        'DEFENSIVE': 0.3,
+        'CRISIS_MODE': 0.1,
+        'EARLY_RECOVERY': 0.6,
+        'LATE_CYCLE': 0.4,
+        'TECH_DOMINANCE': 0.8,
+        'HIGH_VOLATILITY': 0.4,
+        'HIGH_INFLATION': 0.5,
+        'RISING_RATES': 0.5
+    }
+    
+    base_score = base_scores.get(regime, 0.5)
+    
+    # Adjust based on current conditions
+    vix_adjustment = max(-0.2, min(0.2, (20 - vix) / 100))
+    curve_adjustment = max(-0.1, min(0.1, curve_bps / 1000))
+    
+    final_score = base_score + vix_adjustment + curve_adjustment
+    return max(0.1, min(0.9, final_score))
 
 def generate_sector_recommendations(rate_environment: Dict, market_regime: Dict, yield_curve: Dict, recession_analysis: Dict = None) -> Dict:
-    """Generate sector weight adjustments based on macro conditions and recession probability."""
+    """Generate sector weight adjustments based on enhanced market regime."""
+    
+    # Get regime and characteristics  
+    regime = market_regime.get('regime', 'OPTIMISTIC')
+    characteristics = market_regime.get('characteristics', {})
+    sector_adjustments = characteristics.get('sector_adjustments', {})
+    
     recommendations = {}
-    
-    # Base case: equal sector weights
-    base_weights = {
-        'Technology': 0.12,
-        'Healthcare': 0.12,
-        'Financial Services': 0.10,
-        'Industrials': 0.10,
-        'Consumer Cyclical': 0.10,
-        'Consumer Defensive': 0.08,
-        'Energy': 0.08,
-        'Basic Materials': 0.08,
-        'Real Estate': 0.08,
-        'Communication Services': 0.08,
-        'Utilities': 0.06
-    }
-    
-    adjusted_weights = base_weights.copy()
-    
-    # Recession probability adjustments (highest priority)
-    if recession_analysis:
-        recession_prob = recession_analysis.get('recession_probability', 0)
-        
-        if recession_prob >= 70:  # High recession risk
-            # Defensive overweight
-            adjusted_weights['Consumer Defensive'] *= 1.5
-            adjusted_weights['Healthcare'] *= 1.4
-            adjusted_weights['Utilities'] *= 1.4
-            # Cyclical underweight
-            adjusted_weights['Consumer Cyclical'] *= 0.6
-            adjusted_weights['Technology'] *= 0.7
-            adjusted_weights['Basic Materials'] *= 0.6
-            adjusted_weights['Energy'] *= 0.7
-            adjusted_weights['Industrials'] *= 0.7
-            
-        elif recession_prob >= 40:  # Moderate recession risk
-            # Moderate defensive tilt
-            adjusted_weights['Consumer Defensive'] *= 1.3
-            adjusted_weights['Healthcare'] *= 1.2
-            adjusted_weights['Utilities'] *= 1.2
-            adjusted_weights['Consumer Cyclical'] *= 0.8
-            adjusted_weights['Technology'] *= 0.9
-            adjusted_weights['Basic Materials'] *= 0.8
-            
-        elif recession_prob <= 15:  # Low recession risk
-            # Cyclical overweight
-            adjusted_weights['Technology'] *= 1.2
-            adjusted_weights['Consumer Cyclical'] *= 1.3
-            adjusted_weights['Industrials'] *= 1.2
-            adjusted_weights['Basic Materials'] *= 1.1
-            adjusted_weights['Consumer Defensive'] *= 0.8
-            adjusted_weights['Utilities'] *= 0.8
-    
-    # Interest rate adjustments (secondary priority)
-    growth_vs_value = rate_environment.get('growth_vs_value', 'Neutral')
-    
-    if 'Growth' in growth_vs_value and (not recession_analysis or recession_analysis.get('recession_probability', 0) < 40):
-        # Favor growth sectors in low rate environment (if recession risk is low)
-        adjusted_weights['Technology'] *= 1.2
-        adjusted_weights['Healthcare'] *= 1.1
-        adjusted_weights['Communication Services'] *= 1.1
-        adjusted_weights['Financial Services'] *= 0.9
-        adjusted_weights['Real Estate'] *= 0.8
-        adjusted_weights['Utilities'] *= 0.8
-    elif 'Value' in growth_vs_value:
-        # Favor value sectors in high rate environment
-        adjusted_weights['Financial Services'] *= 1.3
-        adjusted_weights['Energy'] *= 1.2
-        adjusted_weights['Basic Materials'] *= 1.1
-        adjusted_weights['Technology'] *= 0.9
-        adjusted_weights['Real Estate'] *= 0.9
-    
-    # Yield curve adjustments
-    curve_shape = yield_curve.get('curve_shape', 'Normal')
-    
-    if curve_shape == "Steep" and (not recession_analysis or recession_analysis.get('recession_probability', 0) < 40):
-        # Steep curve favors financials (if not in recession)
-        adjusted_weights['Financial Services'] *= 1.1
-    elif curve_shape == "Inverted":
-        # Inverted curve - defensive positioning
-        adjusted_weights['Consumer Defensive'] *= 1.2
-        adjusted_weights['Healthcare'] *= 1.1
-        adjusted_weights['Utilities'] *= 1.1
-        adjusted_weights['Consumer Cyclical'] *= 0.8
-        adjusted_weights['Energy'] *= 0.9
-    
-    # Volatility adjustments
-    risk_appetite = market_regime.get('risk_appetite', 'Moderate')
-    
-    if risk_appetite == 'Low' or risk_appetite == 'Very Low':
-        # Defensive positioning in high volatility
-        adjusted_weights['Healthcare'] *= 1.1
-        adjusted_weights['Consumer Defensive'] *= 1.2
-        adjusted_weights['Utilities'] *= 1.1
-        adjusted_weights['Technology'] *= 0.9
-        adjusted_weights['Consumer Cyclical'] *= 0.8
-    elif risk_appetite == 'High' and (not recession_analysis or recession_analysis.get('recession_probability', 0) < 30):
-        # Risk-on positioning (only if recession risk is low)
-        adjusted_weights['Technology'] *= 1.1
-        adjusted_weights['Consumer Cyclical'] *= 1.1
-        adjusted_weights['Energy'] *= 1.05
-        adjusted_weights['Utilities'] *= 0.9
-        adjusted_weights['Consumer Defensive'] *= 0.9
-    
-    # Normalize weights to sum to 1
-    total_weight = sum(adjusted_weights.values())
-    normalized_weights = {k: v/total_weight for k, v in adjusted_weights.items()}
-    
-    # Calculate adjustments from base case
-    adjustments = {}
-    for sector in base_weights:
-        change = normalized_weights[sector] - base_weights[sector]
-        if abs(change) > 0.01:  # Only show meaningful changes
-            adjustments[sector] = {
-                'base_weight': base_weights[sector],
-                'recommended_weight': normalized_weights[sector],
-                'change': change,
-                'action': 'Overweight' if change > 0 else 'Underweight'
+    for sector, adjustment in sector_adjustments.items():
+        if abs(adjustment) > 0.05:  # Only include meaningful adjustments
+            recommendations[sector] = {
+                'weight_adjustment': 1.0 + adjustment,
+                'adjustment_percentage': adjustment * 100,
+                'reason': f"Regime: {regime}"
             }
     
-    return adjustments
+    return recommendations
 
 def generate_style_recommendations(rate_environment: Dict, market_regime: Dict, recession_analysis: Dict = None) -> Dict:
-    """Generate style allocation adjustments based on macro conditions and recession probability."""
-    # Base case style allocation
+    """Generate style allocation adjustments based on enhanced market regime."""
+    
+    # Get regime characteristics
+    regime = market_regime.get('regime', 'OPTIMISTIC')
+    characteristics = market_regime.get('characteristics', {})
+    growth_tilt = characteristics.get('growth_tilt', 0.0)
+    risk_level = characteristics.get('risk_level', 'MODERATE')
+    
+    # Base style allocation
     base_allocation = {
         'Quality': 0.40,
-        'Growth': 0.30,
+        'Growth': 0.30, 
         'Value': 0.20,
         'Blend': 0.10
     }
     
-    adjusted_allocation = base_allocation.copy()
+    # Adjust based on regime
+    adjustments = {}
     
-    # Recession probability adjustments (highest priority)
-    if recession_analysis:
-        recession_prob = recession_analysis.get('recession_probability', 0)
-        
-        if recession_prob >= 70:  # High recession risk
-            adjusted_allocation['Quality'] += 0.20  # Quality becomes 60%
-            adjusted_allocation['Growth'] -= 0.15   # Growth becomes 15%
-            adjusted_allocation['Value'] -= 0.05    # Value becomes 15%
-            
-        elif recession_prob >= 40:  # Moderate recession risk
-            adjusted_allocation['Quality'] += 0.10  # Quality becomes 50%
-            adjusted_allocation['Growth'] -= 0.08   # Growth becomes 22%
-            adjusted_allocation['Blend'] -= 0.02    # Blend becomes 8%
-            
-        elif recession_prob <= 15:  # Low recession risk - more aggressive
-            adjusted_allocation['Growth'] += 0.10   # Growth becomes 40%
-            adjusted_allocation['Quality'] -= 0.05  # Quality becomes 35%
-            adjusted_allocation['Blend'] -= 0.05    # Blend becomes 5%
+    if growth_tilt > 0.1:  # Growth regime
+        adjustments = {
+            'Growth': {'adjustment': 0.10, 'reason': f'Growth tilt in {regime} regime'},
+            'Quality': {'adjustment': -0.05, 'reason': f'Reducing quality for growth'},
+            'Value': {'adjustment': -0.05, 'reason': f'Reducing value for growth'}
+        }
+    elif growth_tilt < -0.1:  # Defensive regime
+        adjustments = {
+            'Quality': {'adjustment': 0.15, 'reason': f'Quality emphasis in {regime} regime'},
+            'Growth': {'adjustment': -0.10, 'reason': f'Reducing growth risk'},
+            'Value': {'adjustment': -0.05, 'reason': f'Reducing value risk'}
+        }
     
-    # Interest rate adjustments (secondary priority)
-    growth_vs_value = rate_environment.get('growth_vs_value', 'Neutral')
-    
-    if 'Growth' in growth_vs_value and (not recession_analysis or recession_analysis.get('recession_probability', 0) < 40):
-        adjusted_allocation['Growth'] += 0.05
-        adjusted_allocation['Value'] -= 0.03
-        adjusted_allocation['Blend'] -= 0.02
-    elif 'Value' in growth_vs_value:
-        adjusted_allocation['Value'] += 0.10
-        adjusted_allocation['Growth'] -= 0.08
-        adjusted_allocation['Blend'] -= 0.02
-    
-    # Risk appetite adjustments
-    risk_appetite = market_regime.get('risk_appetite', 'Moderate')
-    
-    if risk_appetite in ['Low', 'Very Low']:
-        # Increase quality allocation in uncertain times
-        adjusted_allocation['Quality'] += 0.05
-        adjusted_allocation['Growth'] -= 0.03
-        adjusted_allocation['Blend'] -= 0.02
-    elif risk_appetite == 'High' and (not recession_analysis or recession_analysis.get('recession_probability', 0) < 30):
-        # Increase growth allocation in risk-on environment (only if recession risk is low)
-        adjusted_allocation['Growth'] += 0.03
-        adjusted_allocation['Quality'] -= 0.03
-    
-    # Ensure allocations are non-negative and sum to 1
-    for style in adjusted_allocation:
-        adjusted_allocation[style] = max(0.05, adjusted_allocation[style])  # Minimum 5%
-    
-    total = sum(adjusted_allocation.values())
-    adjusted_allocation = {k: v/total for k, v in adjusted_allocation.items()}
-    
-    # Calculate changes
-    style_changes = {}
-    for style in base_allocation:
-        change = adjusted_allocation[style] - base_allocation[style]
-        if abs(change) > 0.01:
-            style_changes[style] = {
-                'base_allocation': base_allocation[style],
-                'recommended_allocation': adjusted_allocation[style],
-                'change': change,
-                'action': 'Increase' if change > 0 else 'Decrease'
-            }
-    
-    return style_changes
+    return adjustments
 
 def generate_risk_adjustments(market_regime: Dict, economic_indicators: Dict, recession_analysis: Dict = None) -> Dict:
-    """Generate portfolio risk level adjustments based on macro conditions and recession probability."""
-    vix = economic_indicators.get('vix', 20)
-    risk_appetite = market_regime.get('risk_appetite', 'Moderate')
+    """Generate portfolio risk level adjustments based on enhanced market regime."""
     
-    # Base portfolio risk level (1.0 = normal)
-    base_risk_level = 1.0
+    regime = market_regime.get('regime', 'OPTIMISTIC')
+    characteristics = market_regime.get('characteristics', {})
+    risk_level = characteristics.get('risk_level', 'MODERATE')
+    volatility_target = characteristics.get('volatility_target', 0.15)
     
-    # Recession probability adjustments (highest priority)
-    if recession_analysis:
-        recession_prob = recession_analysis.get('recession_probability', 0)
-        
-        if recession_prob >= 70:
-            risk_multiplier = 0.6  # Reduce risk by 40%
-            recommendation = "Reduce overall portfolio risk significantly due to high recession probability"
-        elif recession_prob >= 40:
-            risk_multiplier = 0.8  # Reduce risk by 20%
-            recommendation = "Reduce overall portfolio risk moderately due to elevated recession risk"
-        elif recession_prob <= 15:
-            risk_multiplier = 1.1  # Increase risk by 10%
-            recommendation = "Slightly increase portfolio risk given low recession probability"
-        else:
-            risk_multiplier = 0.95  # Slightly reduce risk
-            recommendation = "Maintain slightly defensive risk posture"
-    else:
-        # Fallback to volatility-based adjustments
-        if risk_appetite == 'Very Low':
-            risk_multiplier = 0.7  # Reduce risk by 30%
-            recommendation = "Reduce overall portfolio risk significantly"
-        elif risk_appetite == 'Low':
-            risk_multiplier = 0.85  # Reduce risk by 15%
-            recommendation = "Reduce overall portfolio risk moderately"
-        elif risk_appetite == 'High':
-            risk_multiplier = 1.15  # Increase risk by 15%
-            recommendation = "Increase overall portfolio risk moderately"
-        else:
-            risk_multiplier = 1.0
-            recommendation = "Maintain current risk level"
+    # Base risk multiplier
+    risk_multipliers = {
+        'VERY_LOW': 0.6,
+        'LOW': 0.8,
+        'MODERATE': 1.0,
+        'MODERATE_HIGH': 1.15,
+        'HIGH': 1.3
+    }
     
-    # Additional rationale
-    rationale_parts = [f"VIX at {vix:.1f} indicates {market_regime.get('volatility_regime', 'normal')} market conditions"]
-    
-    if recession_analysis:
-        recession_prob = recession_analysis.get('recession_probability', 0)
-        rationale_parts.append(f"Recession probability: {recession_prob:.0f}%")
-        # Update to use the new NY Fed model structure
-        if recession_analysis.get('supplemental_indicators'):
-            risk_factors = []
-            for indicator, status in recession_analysis['supplemental_indicators'].items():
-                if 'TRIGGERED' in status or 'HIGH' in status or 'WEAK' in status:
-                    risk_factors.append(f"{indicator}: {status}")
-            if risk_factors:
-                rationale_parts.append(f"Key risks: {', '.join(risk_factors[:2])}")
+    risk_multiplier = risk_multipliers.get(risk_level, 1.0)
     
     return {
         'risk_multiplier': risk_multiplier,
-        'recommendation': recommendation,
-        'vix_level': vix,
-        'recession_probability': recession_analysis.get('recession_probability', 0) if recession_analysis else 0,
-        'rationale': '; '.join(rationale_parts)
+        'volatility_target': volatility_target,
+        'recommendation': f"Adjust portfolio risk to {risk_level} level for {regime} regime",
+        'regime': regime,
+        'risk_level': risk_level
     }
 
 def generate_macro_report(treasury_rates: Dict, economic_indicators: Dict, 
@@ -1197,439 +1402,54 @@ def generate_macro_report(treasury_rates: Dict, economic_indicators: Dict,
                          market_regime: Dict, recession_analysis: Dict,
                          sector_recs: Dict, style_recs: Dict, risk_adj: Dict,
                          fed_data: Dict = None, fed_proximity_analysis: Dict = None) -> None:
-    """Generate comprehensive macro analysis report with NY Fed probit model results."""
+    """Generate comprehensive enhanced macro analysis report."""
     print("\n" + "="*80)
-    print("MACRO ECONOMIC ANALYSIS REPORT")
+    print("ENHANCED MACRO ECONOMIC ANALYSIS REPORT")
     print("="*80)
     
-    print(f"\nCurrent Market Conditions:")
-    print(f"Date: {treasury_rates.get('date', 'N/A')}")
-    print(f"Fed Funds Rate: {rate_environment.get('fed_funds_rate', 0):.2f}%")
-    print(f"10-Year Treasury: {treasury_rates.get('10_year', 0):.2f}%")
-    print(f"2-Year Treasury: {treasury_rates.get('2_year', 0):.2f}%")
+    # Enhanced Market Regime Section
+    regime = market_regime.get('regime', 'UNKNOWN')
+    confidence = market_regime.get('confidence', 0.0)
+    characteristics = market_regime.get('characteristics', {})
+    market_conditions = market_regime.get('market_conditions', {})
     
-    print(f"\nYield Curve Analysis (Basis Points):")
-    print(f"2s10s Curve: {yield_curve.get('curve_2s10s_bps', 0):.0f} bps ({yield_curve.get('curve_shape', 'N/A')})")
-    print(f"Term Spread (3M-10Y): {yield_curve.get('term_spread_bps', 0):.0f} bps")
-    print(f"Fed vs 10Y Spread: {rate_environment.get('fed_10y_spread_bps', 0):+.0f} bps")
-    print(f"Fed vs 2Y Spread: {rate_environment.get('fed_2y_spread_bps', 0):+.0f} bps")
+    print(f"\n🎯 ENHANCED MARKET REGIME ANALYSIS:")
+    print(f"Detected Regime: {regime} (Confidence: {confidence:.0%})")
+    print(f"Description: {characteristics.get('description', 'N/A')}")
+    print(f"Risk Level: {characteristics.get('risk_level', 'N/A')}")
+    print(f"Growth Tilt: {characteristics.get('growth_tilt', 0.0):+.1%}")
     
-    print(f"\nNY Fed Recession Analysis:")
-    if recession_analysis:
-        print(f"🏛️  Model: {recession_analysis.get('model_type', 'Unknown')} ({recession_analysis.get('model_vintage', 'N/A')})")
-        print(f"📊 Recession Probability: {recession_analysis.get('recession_probability', 0):.1f}%")
-        
-        # Show confidence intervals
-        print(f"📊 Confidence Intervals:")
-        print(f"   68%: {recession_analysis.get('confidence_68_lower', 0):.1f}% - {recession_analysis.get('confidence_68_upper', 0):.1f}%")
-        print(f"   90%: {recession_analysis.get('confidence_90_lower', 0):.1f}% - {recession_analysis.get('confidence_90_upper', 0):.1f}%")
-        
-        print(f"📊 Risk Level: {recession_analysis.get('risk_level', 'N/A')}")
-        print(f"📊 Time Horizon: {recession_analysis.get('time_horizon', 'N/A')}")
-        print(f"📊 Interpretation: {recession_analysis.get('interpretation', 'N/A')}")
-        print(f"📊 Relative Risk: {recession_analysis.get('relative_risk', 'N/A')} (vs {recession_analysis.get('unconditional_average', 15)}% historical avg)")
-        
-        # Show term structure data
-        print(f"\n📊 Term Structure Data:")
-        print(f"   10Y-3M Spread: {recession_analysis.get('term_spread_10y3m', 0):.3f}%")
-        print(f"   10Y-2Y Spread: {recession_analysis.get('term_spread_10y2y', 0):.3f}%")
-        
-        # Show model parameters for transparency
-        if 'model_parameters' in recession_analysis:
-            params = recession_analysis['model_parameters']
-            print(f"   Model: P(Recession) = Φ({params.get('alpha', 0):.4f} + {params.get('beta', 0):.4f} × term_spread)")
-            print(f"   Linear Combination: {params.get('linear_combination', 0):.4f}")
-        
-        # Show supplemental indicators
-        print(f"\n📊 Supplemental Economic Indicators:")
-        if 'supplemental_indicators' in recession_analysis:
-            for indicator, status in recession_analysis['supplemental_indicators'].items():
-                icon = "🚨" if any(x in status for x in ["TRIGGERED", "HIGH", "WEAK"]) else "⚠️" if "WARNING" in status else "✅"
-                print(f"   {icon} {indicator.replace('_', ' ').title()}: {status}")
-        
-        print(f"\n📊 Methodology: {recession_analysis.get('methodology_note', 'N/A')}")
-        print(f"📊 Last Updated: {recession_analysis.get('last_updated', 'N/A')}")
-    else:
-        print("Recession analysis unavailable")
+    print(f"\n📊 Current Market Conditions:")
+    print(f"VIX: {market_conditions.get('vix', 0):.1f}")
+    print(f"Yield Curve (2s10s): {market_conditions.get('yield_curve_bps', 0):.0f} bps")
+    print(f"Unemployment: {market_conditions.get('unemployment', 0):.1f}%")
+    print(f"Inflation: {market_conditions.get('inflation', 0):.1f}%")
+    print(f"Fed Funds: {market_conditions.get('fed_funds', 0):.2f}%")
+    print(f"Leading Sector: {market_conditions.get('leading_sector', 'Unknown')}")
     
-    print(f"\nMacro Regime Classification:")
-    print(f"Rate Environment: {rate_environment.get('rate_environment', 'N/A')}")
-    print(f"Policy Stance: {rate_environment.get('policy_stance', 'N/A')}")
-    print(f"Economic Cycle: {market_regime.get('economic_cycle', 'N/A')}")
-    print(f"Volatility Regime: {market_regime.get('volatility_regime', 'N/A')} (VIX: {market_regime.get('vix_level', 0):.1f})")
-    print(f"Risk Appetite: {market_regime.get('risk_appetite', 'N/A')}")
+    print(f"\n💡 Investment Implications:")
+    print(f"Target Volatility: {characteristics.get('volatility_target', 0.15):.1%}")
     
-    print(f"\nSector Allocation Recommendations:")
+    # Sector recommendations
     if sector_recs:
+        print(f"\n📈 Sector Adjustments:")
         for sector, rec in sector_recs.items():
-            print(f"  {rec['action']} {sector}: {rec['base_weight']:.1%} → {rec['recommended_weight']:.1%} ({rec['change']:+.1%})")
-    else:
-        print("  No significant sector adjustments recommended")
+            adj = rec.get('adjustment_percentage', 0)
+            print(f"  {sector}: {adj:+.0f}%")
     
-    print(f"\nStyle Allocation Recommendations:")
+    # Style recommendations  
     if style_recs:
+        print(f"\n🎨 Style Adjustments:")
         for style, rec in style_recs.items():
-            print(f"  {rec['action']} {style}: {rec['base_allocation']:.1%} → {rec['recommended_allocation']:.1%} ({rec['change']:+.1%})")
-    else:
-        print("  No significant style adjustments recommended")
+            adj = rec.get('adjustment', 0)
+            print(f"  {style}: {adj:+.1%}")
     
-    print(f"\nRisk Level Recommendations:")
-    print(f"  {risk_adj.get('recommendation', 'N/A')}")
-    print(f"  Risk Multiplier: {risk_adj.get('risk_multiplier', 1.0):.2f}")
-    print(f"  Rationale: {risk_adj.get('rationale', 'N/A')}")
-    
-    print(f"\nKey Macro Warnings:")
-    warnings = []
-    
-    # Recession warnings (highest priority) - updated for NY Fed model
-    if recession_analysis:
-        recession_prob = recession_analysis.get('recession_probability', 0)
-        risk_level = recession_analysis.get('risk_level', 'Low')
-        
-        if recession_prob >= 50:
-            warnings.append(f"🚨 HIGH RECESSION RISK: {recession_prob:.1f}% probability ({risk_level}) - defensive positioning recommended")
-        elif recession_prob >= 30:
-            warnings.append(f"⚠️  ELEVATED RECESSION RISK: {recession_prob:.1f}% probability ({risk_level}) - consider defensive positioning")
-        elif recession_prob >= 20:
-            warnings.append(f"⚠️  Moderate recession risk: {recession_prob:.1f}% probability ({risk_level}) - monitor closely")
-        
-        # Check supplemental indicators for additional warnings
-        if 'supplemental_indicators' in recession_analysis:
-            supp = recession_analysis['supplemental_indicators']
-            if 'TRIGGERED' in supp.get('sahm_rule', ''):
-                warnings.append(f"🚨 SAHM RULE TRIGGERED: Recession likely already started")
-            if 'HIGH' in supp.get('credit_stress', ''):
-                warnings.append(f"🚨 CREDIT STRESS: Financial markets under pressure")
-            if 'WEAK' in supp.get('lei_signal', ''):
-                warnings.append(f"⚠️  ECONOMIC INDICATORS WEAKENING: Leading indicators declining")
-    
-    # Yield curve warnings with actual spreads
-    if recession_analysis:
-        term_spread = recession_analysis.get('term_spread_10y3m', 0)
-        if term_spread < -1.0:
-            warnings.append(f"🚨 DEEPLY INVERTED YIELD CURVE: {term_spread:.2f}% spread - recession highly likely within 12 months")
-        elif term_spread < -0.5:
-            warnings.append(f"⚠️  Inverted yield curve ({term_spread:.2f}%) indicates elevated recession risk")
-        elif term_spread < 0:
-            warnings.append(f"⚠️  Inverted yield curve ({term_spread:.2f}%) - caution warranted")
-    
-    # Fed policy warnings
-    fed_10y_spread = rate_environment.get('fed_10y_spread_bps', 0)
-    if fed_10y_spread < -100:
-        warnings.append(f"⚠️  10Y significantly below Fed Funds ({fed_10y_spread:+.0f} bps) suggests crisis expectations")
-    elif fed_10y_spread > 300:
-        warnings.append(f"⚠️  Very high term premium ({fed_10y_spread:+.0f} bps) suggests inflation/fiscal concerns")
-    
-    # Volatility warnings
-    if economic_indicators.get('vix', 20) > 35:
-        warnings.append(f"⚠️  CRISIS VOLATILITY: VIX {economic_indicators.get('vix', 0):.1f} suggests market panic")
-    elif economic_indicators.get('vix', 20) > 30:
-        warnings.append(f"⚠️  Elevated market volatility (VIX: {economic_indicators.get('vix', 0):.1f}) suggests heightened uncertainty")
-    
-    # Interest rate warnings
-    if rate_environment.get('ten_year_rate', 0) > 6.0:
-        warnings.append(f"⚠️  Very high interest rates ({rate_environment.get('ten_year_rate', 0):.2f}%) may pressure valuations")
-    
-    if not warnings:
-        warnings.append("✅ No major macro warnings detected")
-    
-    for warning in warnings:
-        print(f"  {warning}")
-    
-    # Investment implications summary - updated for NY Fed model
-    print(f"\nInvestment Strategy Implications:")
-    if recession_analysis:
-        recession_prob = recession_analysis.get('recession_probability', 0)
-        risk_level = recession_analysis.get('risk_level', 'Low')
-        
-        if recession_prob >= 50:
-            print(f"  📊 DEFENSIVE POSITIONING ({risk_level} Risk):")
-            print("     • Overweight Consumer Defensive, Healthcare, Utilities")
-            print("     • Increase Quality allocation to 60%+, reduce Growth exposure")
-            print("     • Reduce overall portfolio risk by 30-40%")
-        elif recession_prob >= 30:
-            print(f"  📊 MODERATE DEFENSIVENESS ({risk_level} Risk):")
-            print("     • Slight overweight in defensive sectors")
-            print("     • Increase Quality allocation to 50%, moderate Growth reduction")
-            print("     • Reduce overall portfolio risk by 15-25%")
-        elif recession_prob <= 15:
-            print(f"  📊 GROWTH POSITIONING ({risk_level} Risk):")
-            print("     • Overweight Technology, Consumer Cyclical")
-            print("     • Increase Growth style to 40%")
-            print("     • Slightly increase portfolio risk by 5-10%")
-        else:
-            print(f"  📊 BALANCED APPROACH ({risk_level} Risk):")
-            print("     • Maintain current allocations with slight defensive bias")
-            print("     • Monitor recession indicators closely")
+    # Risk adjustments
+    risk_mult = risk_adj.get('risk_multiplier', 1.0)
+    print(f"\n⚖️ Risk Adjustment: {risk_mult:.2f}x")
+    print(f"Recommendation: {risk_adj.get('recommendation', 'Maintain current risk level')}")
     
     print("\n" + "="*80)
-
-def scrape_fed_rate_probabilities() -> Dict:
-    """Scrape Fed rate cut/hike probabilities from CME FedWatch Tool."""
-    print("🎯 Scraping Fed rate probabilities from CME FedWatch...")
-    
-    fed_data = {
-        'last_updated': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-        'next_meeting': None,
-        'rate_probabilities': {},
-        'current_rate_range': '5.25-5.50',
-        'source': 'CME_FedWatch',
-        'confidence': 'medium'
-    }
-    
-    try:
-        # CME FedWatch Tool URL
-        url = "https://www.cmegroup.com/markets/interest-rates/cme-fedwatch-tool.html"
-        
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Language': 'en-US,en;q=0.5',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Connection': 'keep-alive'
-        }
-        
-        response = requests.get(url, headers=headers, timeout=10)
-        
-        if response.status_code == 200:
-            # Parse the page for Fed rate probabilities
-            soup = BeautifulSoup(response.content, 'html.parser')
-            
-            # Look for the data in JSON format (CME often embeds data)
-            script_tags = soup.find_all('script')
-            for script in script_tags:
-                if script.string and 'fedwatch' in script.string.lower():
-                    try:
-                        # Extract JSON data from script
-                        json_start = script.string.find('{')
-                        json_end = script.string.rfind('}') + 1
-                        if json_start != -1 and json_end != -1:
-                            json_str = script.string[json_start:json_end]
-                            data = json.loads(json_str)
-                            # Parse Fed rate probabilities from data
-                            fed_data = parse_fedwatch_data(data)
-                            break
-                    except:
-                        continue
-            
-            # Fallback: Parse HTML tables for rate probabilities
-            if not fed_data.get('rate_probabilities'):
-                fed_data = parse_fedwatch_html(soup)
-                
-        else:
-            print(f"❌ CME FedWatch scraping failed: {response.status_code}")
-            fed_data = get_fallback_fed_probabilities()
-            
-    except Exception as e:
-        print(f"❌ Fed rate scraping error: {str(e)}")
-        fed_data = get_fallback_fed_probabilities()
-    
-    # Validate and clean data
-    fed_data = validate_fed_probabilities(fed_data)
-    
-    print(f"✅ Fed rate probabilities updated: {fed_data['confidence']} confidence")
-    return fed_data
-
-def parse_fedwatch_data(data: Dict) -> Dict:
-    """Parse JSON data from CME FedWatch."""
-    fed_data = {
-        'last_updated': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-        'next_meeting': None,
-        'rate_probabilities': {},
-        'current_rate_range': '5.25-5.50',
-        'source': 'CME_FedWatch_JSON',
-        'confidence': 'high'
-    }
-    
-    try:
-        # CME data structure varies, adapt as needed
-        if 'meetings' in data:
-            next_meeting = data['meetings'][0] if data['meetings'] else None
-            if next_meeting:
-                fed_data['next_meeting'] = next_meeting.get('date')
-                
-                # Parse probabilities for rate changes
-                probabilities = next_meeting.get('probabilities', {})
-                fed_data['rate_probabilities'] = {
-                    'rate_cut_25bps': probabilities.get('cut_25', 0.0),
-                    'rate_cut_50bps': probabilities.get('cut_50', 0.0),
-                    'rate_hold': probabilities.get('hold', 0.0),
-                    'rate_hike_25bps': probabilities.get('hike_25', 0.0),
-                    'rate_hike_50bps': probabilities.get('hike_50', 0.0)
-                }
-                
-    except Exception as e:
-        print(f"Error parsing FedWatch JSON: {e}")
-        fed_data['confidence'] = 'low'
-    
-    return fed_data
-
-def parse_fedwatch_html(soup) -> Dict:
-    """Parse HTML tables from CME FedWatch as fallback."""
-    fed_data = {
-        'last_updated': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-        'next_meeting': None,
-        'rate_probabilities': {},
-        'current_rate_range': '5.25-5.50',
-        'source': 'CME_FedWatch_HTML',
-        'confidence': 'medium'
-    }
-    
-    try:
-        # Look for probability tables
-        tables = soup.find_all('table')
-        for table in tables:
-            # Find rate probability data in table headers/cells
-            rows = table.find_all('tr')
-            for row in rows:
-                cells = row.find_all(['td', 'th'])
-                for cell in cells:
-                    text = cell.get_text().strip()
-                    # Look for percentage values that might be probabilities
-                    if '%' in text and any(word in text.lower() for word in ['cut', 'hold', 'hike']):
-                        # Extract and categorize probabilities
-                        percentage = re.search(r'(\d+\.?\d*)%', text)
-                        if percentage:
-                            prob_value = float(percentage.group(1)) / 100
-                            if 'cut' in text.lower():
-                                fed_data['rate_probabilities']['rate_cut'] = prob_value
-                            elif 'hold' in text.lower():
-                                fed_data['rate_probabilities']['rate_hold'] = prob_value
-                            elif 'hike' in text.lower():
-                                fed_data['rate_probabilities']['rate_hike'] = prob_value
-                                
-    except Exception as e:
-        print(f"Error parsing FedWatch HTML: {e}")
-        fed_data['confidence'] = 'low'
-    
-    return fed_data
-
-def get_fallback_fed_probabilities() -> Dict:
-    """Provide fallback Fed rate probabilities when scraping fails."""
-    print("📊 Using fallback Fed rate probabilities...")
-    
-    # Current market consensus (update manually as needed)
-    today = datetime.now()
-    next_meeting_dates = [
-        '2025-01-29', '2025-03-19', '2025-05-01', '2025-06-11',
-        '2025-07-30', '2025-09-17', '2025-11-05', '2025-12-17'
-    ]
-    
-    next_meeting = None
-    for meeting_date in next_meeting_dates:
-        if datetime.strptime(meeting_date, '%Y-%m-%d') > today:
-            next_meeting = meeting_date
-            break
-    
-    # Conservative fallback probabilities (update based on recent market consensus)
-    return {
-        'last_updated': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-        'next_meeting': next_meeting,
-        'rate_probabilities': {
-            'rate_cut_25bps': 0.15,    # 15% chance of 25bp cut
-            'rate_cut_50bps': 0.02,    # 2% chance of 50bp cut  
-            'rate_hold': 0.78,         # 78% chance of hold
-            'rate_hike_25bps': 0.05,   # 5% chance of 25bp hike
-            'rate_hike_50bps': 0.00    # 0% chance of 50bp hike
-        },
-        'current_rate_range': '5.25-5.50',
-        'source': 'Manual_Fallback',
-        'confidence': 'low'
-    }
-
-def validate_fed_probabilities(fed_data: Dict) -> Dict:
-    """Validate and normalize Fed rate probabilities."""
-    try:
-        probabilities = fed_data.get('rate_probabilities', {})
-        
-        # Ensure all probabilities are between 0 and 1
-        for key, value in probabilities.items():
-            if value > 1.0:
-                probabilities[key] = value / 100  # Convert percentage to decimal
-            if value < 0:
-                probabilities[key] = 0.0
-                
-        # Normalize probabilities to sum to 1.0
-        total_prob = sum(probabilities.values())
-        if total_prob > 0:
-            for key in probabilities:
-                probabilities[key] = probabilities[key] / total_prob
-        
-        # Calculate aggregate probabilities for easier use
-        fed_data['aggregate_probabilities'] = {
-            'rate_cut_total': probabilities.get('rate_cut_25bps', 0) + probabilities.get('rate_cut_50bps', 0),
-            'rate_hold': probabilities.get('rate_hold', 0),
-            'rate_hike_total': probabilities.get('rate_hike_25bps', 0) + probabilities.get('rate_hike_50bps', 0)
-        }
-        
-        # Set confidence based on data completeness
-        if fed_data['source'] == 'CME_FedWatch_JSON':
-            fed_data['confidence'] = 'high'
-        elif fed_data['source'] == 'CME_FedWatch_HTML':
-            fed_data['confidence'] = 'medium'
-        else:
-            fed_data['confidence'] = 'low'
-            
-    except Exception as e:
-        print(f"Error validating Fed probabilities: {e}")
-        fed_data['confidence'] = 'low'
-    
-    return fed_data
-
-def analyze_fed_proximity_impact(fed_data: Dict, days_to_meeting: int) -> Dict:
-    """Analyze market impact based on Fed meeting proximity."""
-    print(f"📅 Analyzing Fed proximity impact: {days_to_meeting} days to meeting")
-    
-    analysis = {
-        'days_to_meeting': days_to_meeting,
-        'volatility_expectation': 'normal',
-        'sector_rotation_probability': 'low',
-        'risk_management_recommendation': 'normal',
-        'tactical_adjustments': []
-    }
-    
-    # Get rate probabilities
-    rate_cut_prob = fed_data.get('aggregate_probabilities', {}).get('rate_cut_total', 0)
-    rate_hike_prob = fed_data.get('aggregate_probabilities', {}).get('rate_hike_total', 0)
-    
-    if days_to_meeting <= 2:
-        analysis['volatility_expectation'] = 'very_high'
-        analysis['risk_management_recommendation'] = 'defensive'
-        analysis['tactical_adjustments'].extend([
-            'reduce_position_sizes_by_10_percent',
-            'increase_cash_buffer',
-            'hedge_with_VIX_instruments'
-        ])
-        
-    elif days_to_meeting <= 7:
-        analysis['volatility_expectation'] = 'high'
-        analysis['sector_rotation_probability'] = 'high'
-        
-        if rate_cut_prob > 0.6:  # > 60% chance of cut
-            analysis['tactical_adjustments'].extend([
-                'overweight_technology_growth',
-                'overweight_real_estate',
-                'reduce_financials_exposure'
-            ])
-        elif rate_hike_prob > 0.3:  # > 30% chance of hike  
-            analysis['tactical_adjustments'].extend([
-                'overweight_financials',
-                'reduce_growth_tech_exposure',
-                'increase_defensive_sectors'
-            ])
-        else:  # Uncertain outcome
-            analysis['tactical_adjustments'].extend([
-                'favor_quality_stocks',
-                'reduce_speculative_positions',
-                'maintain_sector_balance'
-            ])
-            
-    elif days_to_meeting <= 14:
-        analysis['volatility_expectation'] = 'elevated'
-        analysis['sector_rotation_probability'] = 'medium'
-        analysis['tactical_adjustments'].append('monitor_rate_sensitive_sectors')
-    
-    return analysis
 
 def main():
     try:

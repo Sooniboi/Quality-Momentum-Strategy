@@ -1,0 +1,84 @@
+{
+  "analysis_date": "2025-06-02T15:13:33.209397",
+  "simulation_parameters": {
+    "num_simulations": 10000,
+    "time_horizon_days": 252,
+    "portfolio_size": 38
+  },
+  "risk_metrics": {
+    "expected_return": 0.10416926708628567,
+    "volatility": 0.1321188188184261,
+    "sharpe_ratio": 0.4100041732944322,
+    "var_95": -0.10010013594844099,
+    "var_99": -0.1641486861887572,
+    "cvar_95": -0.14006318670852533,
+    "cvar_99": -0.19766233035691233,
+    "max_drawdown_mean": -0.10220285777365054,
+    "max_drawdown_95": -0.0525836593014806,
+    "prob_positive": 0.7769,
+    "prob_beat_market": 0.5505,
+    "percentile_10": -0.05945129629902231,
+    "percentile_25": 0.010415593839026294,
+    "percentile_75": 0.18767181579350956,
+    "percentile_90": 0.2780188430477784
+  },
+  "stress_test_results": {
+    "market_crash": {
+      "description": "2008-style market crash (-40% market)",
+      "portfolio_return": -0.45048827897299243,
+      "market_return": -0.4,
+      "relative_performance": -0.050488278972992406
+    },
+    "recession": {
+      "description": "Economic recession (-25% market)",
+      "portfolio_return": -0.28155517435812033,
+      "market_return": -0.25,
+      "relative_performance": -0.03155517435812033
+    },
+    "inflation_shock": {
+      "description": "Inflation shock (high rates)",
+      "portfolio_return": -0.16893310461487215,
+      "market_return": -0.15,
+      "relative_performance": -0.01893310461487216
+    },
+    "sector_rotation": {
+      "description": "Major sector rotation",
+      "portfolio_return": -0.056311034871624054,
+      "market_return": -0.05,
+      "relative_performance": -0.006311034871624051
+    }
+  },
+  "portfolio_metadata": {
+    "construction_date": "2025-06-02T15:13:29.624969",
+    "system_type": "unified_portfolio_construction",
+    "market_regime": "NORMAL",
+    "target_size": 50,
+    "actual_size": 38,
+    "metrics": {
+      "portfolio_quality": 1.0897383426867069,
+      "portfolio_momentum": 0.9016123060583594,
+      "portfolio_volatility": 0.0437521976530139,
+      "portfolio_beta": 1.1044137982500244,
+      "style_distribution": {
+        "Blend": 0.17195893696866085,
+        "Growth": 0.04812321817086321,
+        "Quality": 0.5502932789594922,
+        "Value": 0.22962456590098382
+      },
+      "sector_distribution": {
+        "Basic Materials": 0.024523594010588127,
+        "Communication Services": 0.054391869901413537,
+        "Consumer Cyclical": 0.04987112545727636,
+        "Consumer Defensive": 0.1970602751569694,
+        "Energy": 0.037083833798183995,
+        "Financial Services": 0.15437773265171656,
+        "Healthcare": 0.21353429405928875,
+        "Industrials": 0.08680480810729245,
+        "Real Estate": 0.025688941164690768,
+        "Technology": 0.12662185034616508,
+        "Utilities": 0.03004167534641511
+      },
+      "market_regime": "NORMAL"
+    }
+  }
+}

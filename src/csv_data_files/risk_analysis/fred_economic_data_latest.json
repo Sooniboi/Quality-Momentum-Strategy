@@ -31,17 +31,17 @@
   },
   "consumer_sentiment": {
     "current": 75.0,
-    "date": "2025-06-01",
+    "date": "2025-06-02",
     "source": "FALLBACK"
   },
   "nonfarm_payrolls": {
     "current": 150000,
-    "date": "2025-06-01",
+    "date": "2025-06-02",
     "source": "FALLBACK"
   },
   "initial_claims": {
     "current": 350000,
-    "date": "2025-06-01",
+    "date": "2025-06-02",
     "source": "FALLBACK"
   }
 }

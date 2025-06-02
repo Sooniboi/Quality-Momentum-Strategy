@@ -16,7 +16,9 @@ API_KEY = os.getenv("FMP_API_KEY")
 if not API_KEY:
     raise ValueError("FMP_API_KEY not found in environment variables")
 
-RATE_LIMIT_DELAY = 0.1  # Delay between calls in seconds
+# Optimized for 300 calls/minute = 5 calls/second = 0.2 seconds between calls
+RATE_LIMIT_DELAY = 0.2  # Conservative delay for 300 calls/minute
+BATCH_SIZE = 20  # Process more symbols at once
 
 def get_latest_sp600_file() -> str:
     """Get the latest S&P 600 holdings CSV file."""

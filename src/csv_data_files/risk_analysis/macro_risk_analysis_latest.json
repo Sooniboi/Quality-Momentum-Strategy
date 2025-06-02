@@ -1,5 +1,5 @@
 {
-  "analysis_date": "2025-06-01T23:39:06.845714",
+  "analysis_date": "2025-06-02T17:01:54.507403",
   "market_regime": {
     "rate_environment": {
       "rate_environment": "Dovish Expectations",
@@ -12,9 +12,9 @@
       "real_10y_estimate": -2.4572
     },
     "policy_stance": "Market expects aggressive cuts",
-    "economic_cycle": "Mid-Late Cycle",
-    "volatility_regime": "Normal Volatility",
-    "risk_appetite": "Moderate"
+    "economic_cycle": "N/A",
+    "volatility_regime": "N/A",
+    "risk_appetite": "N/A"
   },
   "recession_analysis": {
     "probability": 22.1,
@@ -27,7 +27,7 @@
     "yield_curve_signal": "Normal"
   },
   "fed_policy": {
-    "timestamp": "2025-06-01 23:39:06",
+    "timestamp": "2025-06-02 17:01:52",
     "data_quality": "medium",
     "current_fed_funds_rate": 4.33,
     "employment_analysis": {
@@ -59,69 +59,38 @@
     }
   },
   "economic_indicators": {
-    "vix": 18.57,
-    "usd_index": 99.36,
-    "gold_price": 3331.1,
-    "oil_price": 61.99
+    "vix": 19.22,
+    "usd_index": 98.732,
+    "gold_price": 3399.3,
+    "oil_price": 62.56
   },
   "risk_recommendations": {
-    "overall_risk_multiplier": 0.95,
+    "overall_risk_multiplier": 1.0,
     "sector_risk_adjustments": {
+      "Energy": {
+        "weight_adjustment": 1.15,
+        "adjustment_percentage": 15.0,
+        "reason": "Regime: HIGH_INFLATION"
+      },
+      "Materials": {
+        "weight_adjustment": 1.1,
+        "adjustment_percentage": 10.0,
+        "reason": "Regime: HIGH_INFLATION"
+      },
       "Technology": {
-        "base_weight": 0.12,
-        "recommended_weight": 0.14314115308151096,
-        "change": 0.023141153081510962,
-        "action": "Overweight"
+        "weight_adjustment": 0.85,
+        "adjustment_percentage": -15.0,
+        "reason": "Regime: HIGH_INFLATION"
       },
-      "Healthcare": {
-        "base_weight": 0.12,
-        "recommended_weight": 0.13121272365805173,
-        "change": 0.011212723658051732,
-        "action": "Overweight"
-      },
-      "Financial Services": {
-        "base_weight": 0.1,
-        "recommended_weight": 0.08946322067594437,
-        "change": -0.01053677932405564,
-        "action": "Underweight"
-      },
-      "Real Estate": {
-        "base_weight": 0.08,
-        "recommended_weight": 0.06361829025844933,
-        "change": -0.016381709741550676,
-        "action": "Underweight"
-      },
-      "Utilities": {
-        "base_weight": 0.06,
-        "recommended_weight": 0.04771371769383699,
-        "change": -0.012286282306163007,
-        "action": "Underweight"
+      "Consumer Discretionary": {
+        "weight_adjustment": 0.9,
+        "adjustment_percentage": -10.0,
+        "reason": "Regime: HIGH_INFLATION"
       }
     },
-    "style_risk_adjustments": {
-      "Growth": {
-        "base_allocation": 0.3,
-        "recommended_allocation": 0.35,
-        "change": 0.04999999999999999,
-        "action": "Increase"
-      },
-      "Value": {
-        "base_allocation": 0.2,
-        "recommended_allocation": 0.17,
-        "change": -0.03,
-        "action": "Decrease"
-      },
-      "Blend": {
-        "base_allocation": 0.1,
-        "recommended_allocation": 0.08,
-        "change": -0.020000000000000004,
-        "action": "Decrease"
-      }
-    },
+    "style_risk_adjustments": {},
     "key_risks": [
-      "VIX at 18.6 indicates Normal Volatility market conditions",
-      "Recession probability: 22%",
-      "Key risks: sahm_rule: TRIGGERED - Recession likely started"
+      ""
     ]
   }
 }

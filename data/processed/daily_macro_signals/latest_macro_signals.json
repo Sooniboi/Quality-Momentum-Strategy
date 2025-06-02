@@ -1,0 +1,27 @@
+{
+  "timestamp": "2025-06-02T17:01:59.892248",
+  "analysis_date": "2025-06-02T17:01:59.892254",
+  "market_regime": {
+    "regime": "HIGH_INFLATION",
+    "confidence": 0.8,
+    "description": "High inflation environment",
+    "risk_level": "MODERATE"
+  },
+  "recession_probability": 0.221,
+  "market_conditions": {
+    "vix": 18.98,
+    "yield_curve_bps": 0.5000000000000004,
+    "unemployment": 4.2,
+    "inflation": 125.221
+  },
+  "fed_policy": {
+    "bias": "\ud83d\udd34 STRONGLY HAWKISH",
+    "rate_direction": "UP"
+  },
+  "trading_recommendation": "PROCEED",
+  "confidence": 0.8,
+  "reasons": [
+    "Stable HIGH_INFLATION regime with high confidence"
+  ],
+  "proceed_reason": "Stable HIGH_INFLATION regime with high confidence"
+}
