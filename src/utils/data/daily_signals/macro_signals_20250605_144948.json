@@ -1,0 +1,22 @@
+{
+  "timestamp": "2025-06-05T14:49:48.170718",
+  "analysis_date": "2025-06-05T14:49:48.170722",
+  "trading_recommendation": "CAUTION",
+  "confidence": 0.3,
+  "reasons": [
+    "Error in analysis - defaulting to caution"
+  ],
+  "error": "[Errno 2] No such file or directory: '/Users/maxsfolder/Desktop/Quality-Momentum-Strategy.git/src/utils/src/analysis/04_macro_economic_analysis.py'",
+  "economic_calendar": {
+    "next_fed_meeting": null,
+    "key_events_next_7_days": [],
+    "today_events": [],
+    "morning_high_impact": [],
+    "optimization_triggers": {
+      "should_reoptimize": false,
+      "urgency": "normal"
+    },
+    "should_reoptimize": false,
+    "urgency": "normal"
+  }
+}

@@ -1,0 +1,17 @@
+[
+  {
+    "date": "2025-05-30",
+    "week_end": "05/30",
+    "portfolio_value": 100000.0,
+    "weekly_return": 0.0,
+    "total_pl": 0.0,
+    "is_baseline": true
+  },
+  {
+    "date": "2025-06-05",
+    "week_end": "06/05",
+    "portfolio_value": 99906.28900000002,
+    "weekly_return": -0.09375886236751317,
+    "total_pl": -93.67099999999996
+  }
+]

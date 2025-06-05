@@ -1,0 +1,14 @@
+# Enhanced Quality Momentum Strategy - Complete Automation Schedule
+# Updated: June 3, 2025 - Added Weekly Performance Reporting
+
+# Daily pre-market macro monitoring (6:00 AM EST / 11:00 AM BST)
+# Runs 3.5 hours before market open for optimal positioning
+0 11 * * * cd /Users/maxsfolder/Desktop/Quality-Momentum-Strategy.git && /Users/maxsfolder/.pyenv/versions/3.11.6/bin/python daily_macro_monitor.py >> logs/macro_monitor.log 2>&1
+
+# Weekly portfolio reoptimization (Monday 5:00 AM EST / 10:00 AM BST)  
+# Runs 4.5 hours before market open for complete rebalancing
+0 10 * * 1 cd /Users/maxsfolder/Desktop/Quality-Momentum-Strategy.git && /Users/maxsfolder/.pyenv/versions/3.11.6/bin/python start_live_trading.py >> logs/cron.log 2>&1
+
+# Weekly performance reporting (Friday 5:00 PM EST / 22:00 PM BST)
+# Runs after market close to generate and email comprehensive weekly report
+0 22 * * 5 cd /Users/maxsfolder/Desktop/Quality-Momentum-Strategy.git && /Users/maxsfolder/.pyenv/versions/3.11.6/bin/python weekly_performance_reporter.py >> logs/weekly_reporter.log 2>&1 

@@ -1,0 +1,14 @@
+{
+  "date": "2025-06-05T14:57:30.362003",
+  "trading_recommendation": "PROCEED",
+  "market_regime": "HIGH_INFLATION",
+  "regime_confidence": 0.8,
+  "recession_probability": 0.221,
+  "fed_policy_direction": "HOLD",
+  "next_fed_meeting_days": 13,
+  "should_reoptimize": true,
+  "optimization_urgency": "medium",
+  "main_reasons": [
+    "Stable HIGH_INFLATION regime with high confidence"
+  ]
+}

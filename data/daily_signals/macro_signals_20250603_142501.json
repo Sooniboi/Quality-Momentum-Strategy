@@ -1,0 +1,141 @@
+{
+  "timestamp": "2025-06-03T14:25:01.015514",
+  "analysis_date": "2025-06-03T14:25:01.015518",
+  "market_regime": {
+    "regime": "HIGH_INFLATION",
+    "confidence": 0.8,
+    "description": "High inflation environment",
+    "risk_level": "MODERATE"
+  },
+  "recession_probability": 0.221,
+  "market_conditions": {
+    "vix": 18.41,
+    "yield_curve_bps": 0.4999999999999998,
+    "unemployment": 4.2,
+    "inflation": 125.221
+  },
+  "fed_policy": {
+    "bias": "\ud83d\udd34 STRONGLY HAWKISH",
+    "rate_direction": "UP"
+  },
+  "trading_recommendation": "PROCEED",
+  "confidence": 0.8,
+  "reasons": [
+    "Stable HIGH_INFLATION regime with high confidence"
+  ],
+  "proceed_reason": "Stable HIGH_INFLATION regime with high confidence",
+  "economic_calendar": {
+    "next_fed_meeting": {
+      "date": "2025-06-18",
+      "type": "FOMC Meeting + SEP",
+      "completed": false,
+      "minutes_release": "2025-07-09",
+      "rate_cut_prob": 15.0,
+      "rate_hold_prob": 85.0,
+      "rate_hike_prob": 0.0,
+      "market_impact": "Very High",
+      "notes": "Next meeting - SEP & press conference",
+      "days_until": 15
+    },
+    "key_events_next_7_days": [
+      {
+        "date": "2025-06-04",
+        "name": "ADP Employment Change",
+        "time": "08:15 ET",
+        "impact": "Medium",
+        "forecast": "122.5K",
+        "days_until": 1
+      },
+      {
+        "date": "2025-06-04",
+        "name": "ISM Non-Manufacturing PMI",
+        "time": "10:00 ET",
+        "impact": "High",
+        "forecast": "52.0",
+        "days_until": 1
+      },
+      {
+        "date": "2025-06-05",
+        "name": "Initial Jobless Claims",
+        "time": "08:30 ET",
+        "impact": "Medium",
+        "forecast": "235K",
+        "days_until": 2
+      },
+      {
+        "date": "2025-06-06",
+        "name": "Non-Farm Payrolls",
+        "time": "08:30 ET",
+        "impact": "Very High",
+        "forecast": "142.5K",
+        "days_until": 3
+      },
+      {
+        "date": "2025-06-06",
+        "name": "Unemployment Rate",
+        "time": "08:30 ET",
+        "impact": "Very High",
+        "forecast": "4.2%",
+        "days_until": 3
+      },
+      {
+        "date": "2025-06-09",
+        "name": "FOMC Minutes Release",
+        "time": "18:00 ET",
+        "impact": "Very High",
+        "forecast": "May Meeting",
+        "days_until": 6
+      }
+    ],
+    "optimization_triggers": {
+      "should_reoptimize": false,
+      "trigger_reason": [],
+      "urgency": "normal",
+      "suggested_focus": [],
+      "next_events": [
+        {
+          "date": "2025-06-04",
+          "name": "ADP Employment Change",
+          "time": "08:15 ET",
+          "impact": "Medium",
+          "forecast": "122.5K",
+          "days_until": 1
+        },
+        {
+          "date": "2025-06-04",
+          "name": "ISM Non-Manufacturing PMI",
+          "time": "10:00 ET",
+          "impact": "High",
+          "forecast": "52.0",
+          "days_until": 1
+        },
+        {
+          "date": "2025-06-05",
+          "name": "Initial Jobless Claims",
+          "time": "08:30 ET",
+          "impact": "Medium",
+          "forecast": "235K",
+          "days_until": 2
+        },
+        {
+          "date": "2025-06-06",
+          "name": "Non-Farm Payrolls",
+          "time": "08:30 ET",
+          "impact": "Very High",
+          "forecast": "142.5K",
+          "days_until": 3
+        },
+        {
+          "date": "2025-06-06",
+          "name": "Unemployment Rate",
+          "time": "08:30 ET",
+          "impact": "Very High",
+          "forecast": "4.2%",
+          "days_until": 3
+        }
+      ]
+    },
+    "should_reoptimize": false,
+    "urgency": "normal"
+  }
+}

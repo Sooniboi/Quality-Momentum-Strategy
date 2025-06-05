@@ -1,0 +1,538 @@
+\documentclass[11pt]{article}
+\usepackage[margin=0.8in]{geometry}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{amsmath}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\usepackage{multirow}
+\usepackage{colortbl}
+\usepackage{hhline}
+
+% Set pgfplots compatibility
+\pgfplotsset{compat=1.18}
+
+% Enhanced table spacing
+\renewcommand{\arraystretch}{1.3}
+\setlength{\arrayrulewidth}{1pt}
+\arrayrulecolor{black}
+
+% Define enhanced color palette
+\definecolor{bullish}{RGB}{34, 139, 34}
+\definecolor{bearish}{RGB}{220, 20, 60}
+\definecolor{primary}{RGB}{70, 130, 180}
+\definecolor{secondary}{RGB}{255, 140, 0}
+\definecolor{accent}{RGB}{106, 90, 205}
+\definecolor{gray}{RGB}{128, 128, 128}
+
+% Sector-specific colors
+\definecolor{healthcare}{RGB}{66, 165, 245}
+\definecolor{technology}{RGB}{255, 152, 0}
+\definecolor{financials}{RGB}{76, 175, 80}
+\definecolor{consumer}{RGB}{156, 39, 176}
+\definecolor{industrials}{RGB}{96, 125, 139}
+\definecolor{energy}{RGB}{255, 87, 34}
+\definecolor{utilities}{RGB}{121, 85, 72}
+\definecolor{materials}{RGB}{158, 158, 158}
+\definecolor{realestate}{RGB}{139, 195, 74}
+\definecolor{communication}{RGB}{233, 30, 99}
+
+% Arrow symbols for gains/losses using basic LaTeX symbols
+\newcommand{\gainArrow}{\textcolor{bullish}{$\uparrow$}}
+\newcommand{\lossArrow}{\textcolor{bearish}{$\downarrow$}}
+\newcommand{\flatArrow}{\textcolor{gray}{$\rightarrow$}}
+
+% Header and footer
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\textbf{Quality Momentum Strategy}}
+\fancyhead[R]{Weekly Report - {{REPORT_DATE}}}
+\fancyfoot[C]{\thepage}
+\fancyfoot[L]{\small Generated: {{GENERATION_TIMESTAMP}}}
+\fancyfoot[R]{\small Automated Reporting System}
+
+\title{\textbf{Weekly Portfolio Performance Report} \\ 
+        \large \textcolor{primary}{Quality Momentum Strategy}}
+\author{Automated Reporting System}
+\date{{{REPORT_DATE}}}
+
+\begin{document}
+
+\maketitle
+
+% Executive Summary with enhanced formatting
+\section{Executive Summary}
+
+\renewcommand{\arraystretch}{1.3}
+\begin{center}
+\begin{tabularx}{\textwidth}{|X|X|X|}
+\hline
+\rowcolor{primary!10}
+\multicolumn{3}{|c|}{\textbf{\large Portfolio Performance Summary}} \\
+\hline
+\textbf{Report Period} & \textbf{Portfolio Value} & \textbf{Weekly Return} \\
+\hline
+{{WEEK_START}} -- {{WEEK_END}} & \textcolor{primary}{\textbf{\$ {{PORTFOLIO_VALUE}}}} & \textcolor{{{RETURN_COLOR}}}{\textbf{{{WEEKLY_RETURN}}\%}} {{RETURN_ARROW}} \\
+\hline
+\textbf{Total P\&L} & \textbf{Active Positions} & \textbf{Cash Position} \\
+\hline
+\textcolor{{{PL_COLOR}}}{\textbf{\${{TOTAL_PL}}}} & \textbf{{{ACTIVE_POSITIONS}}} & \textbf{{{CASH_PERCENTAGE}}\%} \\
+\hline
+\end{tabularx}
+\end{center}
+
+\vspace{0.5cm}
+
+% Key Metrics Dashboard
+\begin{center}
+\begin{tabularx}{\textwidth}{|X|X|X|X|}
+\hline
+\rowcolor{secondary!10}
+\textbf{YTD Return} & \textbf{Sharpe Ratio} & \textbf{Max Drawdown} & \textbf{Volatility} \\
+\hline
+{{YTD_RETURN}}\% & {{SHARPE_RATIO}} & {{MAX_DRAWDOWN}}\% & {{VOLATILITY}}\% \\
+\hline
+\end{tabularx}
+\end{center}
+
+% Rolling Portfolio Performance
+\section{Rolling Portfolio Performance}
+
+\subsection{Portfolio Value Trend}
+
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    width=0.9\textwidth,
+    height=6cm,
+    xlabel={Week},
+    ylabel={Portfolio Value (\$)},
+    title={4-Week Portfolio Value Trend},
+    grid=major,
+    legend pos=north west,
+    xticklabels={{{WEEK_LABELS}}},
+    xtick=data,
+    ymin={{MIN_PORTFOLIO_VALUE}},
+    ymax={{MAX_PORTFOLIO_VALUE}},
+    line width=2pt
+]
+\addplot[color=primary, mark=circle] coordinates {
+    {{PORTFOLIO_VALUE_COORDINATES}}
+};
+\legend{Portfolio Value}
+\end{axis}
+\end{tikzpicture}
+\end{center}
+
+\subsection{Rolling Performance Table}
+
+\begin{center}
+\begin{tabular}{|l|r|r|r|c|}
+\hline
+\rowcolor{primary!15}
+\textbf{Week Ending} & \textbf{Portfolio Value} & \textbf{Weekly Return} & \textbf{Cumulative Return} & \textbf{Trend} \\
+\hline
+{{ROLLING_PERFORMANCE_ROWS}}
+\hline
+\end{tabular}
+\end{center}
+
+% Portfolio Holdings with enhanced formatting
+\section{Portfolio Holdings}
+
+\subsection{Complete Holdings Analysis}
+\renewcommand{\arraystretch}{1.2}
+\small  % Make the entire table smaller
+\begin{longtable}{|l|r|r|r|r|r|r|l|}
+\hline
+\multicolumn{1}{|c|}{\textbf{Ticker}} & \multicolumn{1}{c|}{\textbf{Shares}} & \multicolumn{1}{c|}{\textbf{Price}} & \multicolumn{1}{c|}{\textbf{Market Value}} & \multicolumn{1}{c|}{\textbf{Weight}} & \multicolumn{1}{c|}{\textbf{P\&L}} & \multicolumn{1}{c|}{\textbf{Return}} & \multicolumn{1}{c|}{\textbf{Sector}} \\
+\hline
+\endfirsthead
+\hline
+\multicolumn{1}{|c|}{\textbf{Ticker}} & \multicolumn{1}{c|}{\textbf{Shares}} & \multicolumn{1}{c|}{\textbf{Price}} & \multicolumn{1}{c|}{\textbf{Market Value}} & \multicolumn{1}{c|}{\textbf{Weight}} & \multicolumn{1}{c|}{\textbf{P\&L}} & \multicolumn{1}{c|}{\textbf{Return}} & \multicolumn{1}{c|}{\textbf{Sector}} \\
+\hline
+\endhead
+{{HOLDINGS_TABLE_ROWS}}
+\hline
+\end{longtable}
+\normalsize  % Return to normal size after the table
+
+% Enhanced Sector Analysis
+\section{Sector Analysis}
+
+\subsection{Sector Allocation with Visual Enhancement}
+
+\renewcommand{\arraystretch}{1.3}
+
+\begin{tabularx}{\textwidth}{|X|c|c|c|}
+\hline
+\rowcolor{primary!15}
+\textbf{Sector} & \textbf{Allocation} & \textbf{Weekly Return} & \textbf{Performance} \\
+\hline
+{{SECTOR_ALLOCATION_ROWS}}
+\hline
+\end{tabularx}
+
+\subsection{Sector Performance Chart}
+
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    width=0.9\textwidth,
+    height=8cm,
+    xlabel={Sectors},
+    ylabel={Weekly Return (\%)},
+    title={Weekly Sector Performance},
+    ybar,
+    bar width=20pt,
+    grid=major,
+    nodes near coords,
+    nodes near coords align={vertical},
+    xtick=data,
+    xticklabels={{{SECTOR_LABELS}}},
+    x tick label style={rotate=45, anchor=east}
+]
+\addplot[fill=healthcare] coordinates {
+    {{SECTOR_PERFORMANCE_COORDINATES}}
+};
+\end{axis}
+\end{tikzpicture}
+\end{center}
+
+% Style & Factor Exposure
+\section{Style \& Factor Exposure}
+
+\subsection{Factor Performance Analysis}
+
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|X|c|c|c|c|}
+\hline
+\rowcolor{secondary!15}
+\textbf{Factor} & \textbf{Allocation} & \textbf{Weekly Return} & \textbf{3M Return} & \textbf{Performance} \\
+\hline
+{{FACTOR_EXPOSURE_ROWS}}
+\hline
+\end{tabularx}
+
+\subsection{Factor Performance Chart}
+
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    width=0.9\textwidth,
+    height=8cm,
+    xlabel={Investment Factors},
+    ylabel={Weekly Return (\%)},
+    title={Weekly Factor Performance},
+    ybar,
+    bar width=25pt,
+    grid=major,
+    nodes near coords,
+    nodes near coords align={vertical},
+    xticklabels={{{FACTOR_CHART_LABELS}}},
+    xtick=data
+]
+\addplot[fill=primary] coordinates {
+    {{FACTOR_PERFORMANCE_COORDINATES}}
+};
+\end{axis}
+\end{tikzpicture}
+\end{center}
+
+% Enhanced Performance Analysis
+\section{Performance Analysis}
+
+\subsection{Top \& Bottom Contributors This Week}
+
+% Top 5 Contributors
+\renewcommand{\arraystretch}{1.3}
+\begin{center}
+\begin{tabularx}{\textwidth}{|X|X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|c|}
+\hline
+\rowcolor{accent!15}
+\multicolumn{5}{|c|}{\textbf{Top 5 Contributors}} \\
+\hline
+\textbf{Ticker} & \textbf{Sector} & \textbf{P\&L} & \textbf{Contribution} & \textbf{Trend} \\
+\hline
+{{TOP_CONTRIBUTORS_ROWS}}
+\hline
+\end{tabularx}
+\end{center}
+
+\vspace{0.5cm}
+
+% Bottom 5 Contributors
+\renewcommand{\arraystretch}{1.3}
+\begin{center}
+\begin{tabularx}{\textwidth}{|X|X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|c|}
+\hline
+\rowcolor{bullish!15}
+\multicolumn{5}{|c|}{\textbf{Bottom 5 Contributors}} \\
+\hline
+\textbf{Ticker} & \textbf{Sector} & \textbf{P\&L} & \textbf{Contribution} & \textbf{Trend} \\
+\hline
+{{BOTTOM_CONTRIBUTORS_ROWS}}
+\hline
+\end{tabularx}
+\end{center}
+
+\subsection{Performance Attribution Heat Map}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|}
+\hline
+\rowcolor{bearish!15}
+\textbf{Sector} & \textbf{1-Week Return} & \textbf{1-Month Return} & \textbf{3-Month Return} \\
+\hline
+{{PERFORMANCE_HEATMAP_ROWS}}
+\hline
+\end{tabularx}
+
+% Enhanced Fundamental Analysis
+\section{Fundamental Analysis}
+
+\subsection{Quality Metrics Dashboard}
+
+\renewcommand{\arraystretch}{1.2}
+\small  % Make the table smaller for better fit
+\begin{longtable}{|l|r|r|r|r|r|}
+\hline
+\rowcolor{primary!15}
+\textbf{Ticker} & \textbf{P/E Ratio} & \textbf{ROE} & \textbf{ROIC} & \textbf{Debt/Equity} & \textbf{Quality Score} \\
+\hline
+\endfirsthead
+\hline
+\rowcolor{primary!15}
+\textbf{Ticker} & \textbf{P/E Ratio} & \textbf{ROE} & \textbf{ROIC} & \textbf{Debt/Equity} & \textbf{Quality Score} \\
+\hline
+\endhead
+{{QUALITY_METRICS_ROWS}}
+\hline
+\multicolumn{6}{|c|}{\textbf{Portfolio Weighted Averages}} \\
+\hline
+\textbf{Portfolio} & {{AVG_PE}} & {{AVG_ROE}}\% & {{AVG_ROIC}}\% & {{AVG_DE}} & {{QUALITY_SCORE}}/5 \\
+\hline
+\end{longtable}
+\normalsize  % Return to normal size after the table
+
+\subsection{Quality Assessment Summary}
+
+\begin{center}
+\begin{tabularx}{\textwidth}{|X|X|X|}
+\hline
+\rowcolor{primary!20}
+\textbf{Metric} & \textbf{Portfolio Average} & \textbf{Target/Benchmark} \\
+\hline
+ROE & {{AVG_ROE}}\% & $>$15\% \\
+ROIC & {{AVG_ROIC}}\% & $>$12\% \\
+P/E Ratio & {{AVG_PE}} & $<$25 \\
+Debt-to-Equity & {{AVG_DE}} & $<$0.5 \\
+Overall Quality Score & {{QUALITY_SCORE}}/5 & $>$3.5 \\
+\hline
+\end{tabularx}
+\end{center}
+
+% Enhanced Risk Analysis
+\section{Risk Analysis}
+
+\subsection{Portfolio Risk Metrics}
+
+\begin{center}
+\begin{tabularx}{\textwidth}{|X|X|X|}
+\hline
+\rowcolor{healthcare!10}
+\textbf{Risk Metric} & \textbf{Current Value} & \textbf{Assessment} \\
+\hline
+Portfolio Beta & {{PORTFOLIO_BETA}} & {{BETA_ASSESSMENT}} \\
+Annualized Volatility & {{VOLATILITY}}\% & {{VOLATILITY_ASSESSMENT}} \\
+Value at Risk (95\%) & {{VAR_95}}\% & {{VAR_ASSESSMENT}} \\
+Maximum Drawdown & {{MAX_DRAWDOWN}}\% & {{DRAWDOWN_ASSESSMENT}} \\
+Sharpe Ratio & {{SHARPE_RATIO}} & {{SHARPE_ASSESSMENT}} \\
+Top 5 Concentration & {{TOP5_CONCENTRATION}}\% & {{CONCENTRATION_ASSESSMENT}} \\
+Sector Concentration & {{MAX_SECTOR_WEIGHT}}\% & {{SECTOR_CONCENTRATION_ASSESSMENT}} \\
+\hline
+\end{tabularx}
+\end{center}
+
+\subsection{Risk Composition Chart}
+
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    width=0.9\textwidth,
+    height=6cm,
+    xlabel={Risk Components},
+    ylabel={Contribution to Total Risk (\%)},
+    title={Portfolio Risk Decomposition},
+    ybar,
+    bar width=30pt,
+    grid=major,
+    nodes near coords,
+    nodes near coords align={vertical},
+    xticklabels={Market Risk, Sector Risk, Stock-Specific, Other},
+    xtick=data
+]
+\addplot[fill=bearish!60] coordinates {
+    {{RISK_DECOMPOSITION_COORDINATES}}
+};
+\end{axis}
+\end{tikzpicture}
+\end{center}
+
+% Momentum Analysis Section
+\section{Momentum Analysis}
+
+\subsection{Rolling Momentum Trends}
+
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    width=0.9\textwidth,
+    height=6cm,
+    xlabel={Time Period},
+    ylabel={Return (\%)},
+    title={3-Month and 6-Month Rolling Momentum},
+    grid=major,
+    legend pos=north west,
+    xticklabels={{{MOMENTUM_PERIOD_LABELS}}},
+    xtick=data
+]
+\addplot[color=bullish, mark=square, line width=2pt] coordinates {
+    {{MOMENTUM_3M_COORDINATES}}
+};
+\addplot[color=primary, mark=triangle, line width=2pt] coordinates {
+    {{MOMENTUM_6M_COORDINATES}}
+};
+\legend{3-Month Momentum, 6-Month Momentum}
+\end{axis}
+\end{tikzpicture}
+\end{center}
+
+\subsection{Top Momentum Stocks}
+
+\begin{center}
+\begin{tabularx}{\textwidth}{|X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|}
+\hline
+\rowcolor{bearish!10}
+\textbf{Ticker} & \textbf{3M Return} & \textbf{6M Return} & \textbf{12M Return} & \textbf{Momentum Score} \\
+\hline
+{{MOMENTUM_LEADERS_ROWS}}
+\hline
+\end{tabularx}
+\end{center}
+
+% Market Context and Outlook
+\section{Market Context \& Outlook}
+
+\subsection{Economic Environment}
+
+\begin{center}
+\begin{tabularx}{\textwidth}{|X|X|X|}
+\hline
+\rowcolor{bullish!15}
+\textbf{Indicator} & \textbf{Current Value} & \textbf{Trend} \\
+\hline
+VIX (Market Fear) & {{VIX_VALUE}} & {{VIX_TREND}} \\
+10Y Treasury Yield & {{TREASURY_10Y}}\% & {{TREASURY_TREND}} \\
+USD Index & {{USD_INDEX}} & {{USD_TREND}} \\
+Fed Funds Rate & {{FED_RATE}}\% & {{FED_TREND}} \\
+Inflation (CPI) & {{INFLATION_RATE}}\% & {{INFLATION_TREND}} \\
+\hline
+\end{tabularx}
+\end{center}
+
+\subsection{Recession Risk Analysis}
+
+\textbf{NY Fed Yield Curve Model:} This analysis uses the Federal Reserve Bank of New York's official probit model, which has predicted 7 of the last 9 recessions since the 1960s.
+
+\begin{center}
+\begin{tabularx}{\textwidth}{|X|X|X|}
+\hline
+\rowcolor{bearish!15}
+\textbf{Recession Indicator} & \textbf{Current Value} & \textbf{Assessment} \\
+\hline
+Recession Probability & {{RECESSION_PROBABILITY}}\% & {{RECESSION_RISK_LEVEL}} \\
+Yield Curve (10Y-3M) & {{YIELD_CURVE_SPREAD}} bps & {{YIELD_CURVE_SIGNAL}} \\
+Sahm Rule Indicator & {{SAHM_RULE_VALUE}} & {{SAHM_RULE_STATUS}} \\
+High-Yield Credit Spreads & {{HY_SPREADS}} bps & {{CREDIT_RISK_SIGNAL}} \\
+Unemployment Rate & {{UNEMPLOYMENT_RATE}}\% & {{EMPLOYMENT_SIGNAL}} \\
+\hline
+\end{tabularx}
+\end{center}
+
+\textbf{Model Calculation:} {{MODEL_FORMULA_CALCULATION}}
+
+\textbf{Sahm Rule Explanation:} {{SAHM_RULE_EXPLANATION}}
+
+\textbf{Risk Interpretation:}
+\begin{itemize}
+    \item {{RECESSION_INTERPRETATION_1}}
+    \item {{RECESSION_INTERPRETATION_2}}
+    \item {{RECESSION_INTERPRETATION_3}}
+\end{itemize}
+
+\textbf{Portfolio Impact:}
+\begin{itemize}
+    \item {{PORTFOLIO_IMPACT_1}}
+    \item {{PORTFOLIO_IMPACT_2}}
+    \item {{PORTFOLIO_IMPACT_3}}
+\end{itemize}
+
+\subsection{Next Week Outlook}
+
+\textbf{Key Themes:}
+\begin{itemize}
+    \item {{OUTLOOK_THEME_1}}
+    \item {{OUTLOOK_THEME_2}}
+    \item {{OUTLOOK_THEME_3}}
+\end{itemize}
+
+\textbf{Portfolio Actions:}
+\begin{itemize}
+    \item {{ACTION_ITEM_1}}
+    \item {{ACTION_ITEM_2}}
+    \item {{ACTION_ITEM_3}}
+\end{itemize}
+
+\textbf{Risk Factors to Monitor:}
+\begin{itemize}
+    \item {{RISK_FACTOR_1}}
+    \item {{RISK_FACTOR_2}}
+    \item {{RISK_FACTOR_3}}
+\end{itemize}
+
+% Technical Information
+\section{Report Methodology \& Disclaimers}
+
+\subsection{Data Sources \& Methodology}
+
+This automated report is generated every Friday at 4:00 PM EST using:
+\begin{itemize}
+    \item \textbf{Portfolio Data:} Real-time positions from Alpaca paper trading API
+    \item \textbf{Fundamental Analysis:} Quality momentum scoring based on ROE, ROIC, P/E ratios
+    \item \textbf{Risk Metrics:} Monte Carlo simulation and historical volatility analysis
+    \item \textbf{Performance Attribution:} Position-level and sector-level contribution analysis
+    \item \textbf{Market Data:} Real-time pricing and economic indicators
+\end{itemize}
+
+\subsection{Risk Disclaimers}
+
+\begin{small}
+\textbf{Important Risk Disclosures:}
+\begin{itemize}
+    \item Past performance does not guarantee future results
+    \item All investments carry risk of loss of principal
+    \item This is a paper trading strategy for educational purposes only
+    \item Diversification does not guarantee against market losses
+    \item Automated systems may experience technical failures
+    \item Market conditions can change rapidly and unpredictably
+\end{itemize}
+
+\textbf{Generated:} {{GENERATION_TIMESTAMP}} by Automated Reporting System v2.0
+\end{small}
+
+\end{document} 

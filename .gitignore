@@ -22,24 +22,50 @@ share/python-wheels/
 .installed.cfg
 *.egg
 
-# Data files (keep structure but ignore data)
+# Data files (keep structure but ignore sensitive data)
 data/raw/*.csv
 data/processed/*.csv
 data/results/*.csv
+
+# Generated reports (keep templates, ignore generated)
+reports/weekly/generated/*.pdf
+reports/weekly/generated/*.tex
+reports/weekly/generated/*.aux
+reports/weekly/generated/*.log
+reports/weekly/generated/*.out
 reports/*.html
 reports/*.png
-reports/*.pdf
 
 # Configuration files with API keys
 config/api_keys.json
 config/*_config.json
 trading/paper_trading/*_config.json
+*.env
+!config_template.env
 
 # Logs and temporary files
+logs/*.log
+logs/*.gz
 *.log
 *.tmp
 temp/
-logs/
+temp_cleanup/
+
+# Test outputs and temporary files
+tests/test_output/
+tests/*.pdf
+tests/*.tex
+
+# LaTeX compilation artifacts
+*.aux
+*.fdb_latexmk
+*.fls
+*.out
+*.synctex.gz
+*.toc
+
+# Archive directory (optional - uncomment if you want to ignore)
+# archive/
 
 # OS generated files
 .DS_Store
@@ -67,4 +93,14 @@ env/
 venv/
 ENV/
 env.bak/
-venv.bak/ 
+venv.bak/
+
+# Backup files
+*.bak
+*.backup
+*~
+.#*
+
+# Trading system temporary files
+start_live_trading_backup.py
+*_backup.py 

@@ -1,47 +1,226 @@
 {
   "fed_funds_rate": {
-    "current": 4.33,
-    "date": "2025-04-01",
-    "source": "FRED_CSV"
+    "current": 1.07,
+    "previous": 1.22,
+    "change": -0.1499999999999999,
+    "date": "1954-09-01",
+    "source": "FRED_API"
+  },
+  "fed_target_upper": {
+    "current": 0.25,
+    "previous": 0.25,
+    "change": 0.0,
+    "date": "2008-12-18",
+    "source": "FRED_API"
+  },
+  "fed_target_lower": {
+    "current": 0.0,
+    "previous": 0.0,
+    "change": 0.0,
+    "date": "2008-12-18",
+    "source": "FRED_API"
   },
   "unemployment_rate": {
-    "current": 4.2,
-    "date": "2025-04-01",
-    "source": "FRED_CSV"
+    "current": 4.0,
+    "previous": 3.8,
+    "change": 0.20000000000000018,
+    "date": "1948-03-01",
+    "source": "FRED_API"
   },
   "core_pce_inflation": {
-    "current": 125.221,
-    "date": "2025-04-01",
-    "source": "FRED_CSV"
+    "current": 15.531,
+    "previous": 15.513,
+    "change": 0.018000000000000682,
+    "date": "1959-03-01",
+    "source": "FRED_API"
+  },
+  "pce_inflation": {
+    "current": 15.189,
+    "previous": 15.179,
+    "change": 0.009999999999999787,
+    "date": "1959-03-01",
+    "source": "FRED_API"
+  },
+  "cpi_inflation": {
+    "current": 22.0,
+    "previous": 21.62,
+    "change": 0.379999999999999,
+    "date": "1947-03-01",
+    "source": "FRED_API"
   },
   "treasury_10y": {
-    "current": 4.28,
-    "date": "2025-04-01",
-    "source": "FRED_CSV"
+    "current": 3.11,
+    "previous": 3.05,
+    "change": 0.06000000000000005,
+    "date": "1953-06-01",
+    "source": "FRED_API"
   },
   "treasury_2y": {
-    "current": 3.78,
-    "date": "2025-04-01",
-    "source": "FRED_CSV"
+    "current": 6.63,
+    "previous": 6.85,
+    "change": -0.21999999999999975,
+    "date": "1976-08-01",
+    "source": "FRED_API"
   },
   "treasury_3m": {
-    "current": 4.32,
-    "date": "2025-04-01",
-    "source": "FRED_CSV"
+    "current": 11.35,
+    "previous": 14.23,
+    "change": -2.880000000000001,
+    "date": "1981-11-01",
+    "source": "FRED_API"
+  },
+  "treasury_30y": {
+    "current": 7.73,
+    "previous": 7.8,
+    "change": -0.0699999999999994,
+    "date": "1977-04-01",
+    "source": "FRED_API"
   },
   "consumer_sentiment": {
-    "current": 75.0,
-    "date": "2025-06-02",
-    "source": "FALLBACK"
+    "current": NaN,
+    "previous": NaN,
+    "change": NaN,
+    "date": "1953-01-01",
+    "source": "FRED_API"
   },
   "nonfarm_payrolls": {
-    "current": 150000,
-    "date": "2025-06-02",
-    "source": "FALLBACK"
+    "current": 30280.0,
+    "previous": 30100.0,
+    "change": 180.0,
+    "date": "1939-03-01",
+    "source": "FRED_API"
+  },
+  "real_gdp": {
+    "current": 2172.432,
+    "previous": 2176.892,
+    "change": -4.460000000000036,
+    "date": "1947-07-01",
+    "source": "FRED_API"
+  },
+  "yield_spread_10y_2y": {
+    "current": 0.7,
+    "previous": 0.71,
+    "change": -0.010000000000000009,
+    "date": "1976-06-03",
+    "source": "FRED_API"
+  },
+  "yield_spread_10y_3m": {
+    "current": 2.43,
+    "previous": 2.24,
+    "change": 0.18999999999999995,
+    "date": "1982-01-06",
+    "source": "FRED_API"
   },
   "initial_claims": {
-    "current": 350000,
-    "date": "2025-06-02",
-    "source": "FALLBACK"
+    "current": 217000.0,
+    "previous": 207000.0,
+    "change": 10000.0,
+    "date": "1967-01-21",
+    "source": "FRED_API"
+  },
+  "continuing_claims": {
+    "current": 1119000.0,
+    "previous": 1119000.0,
+    "change": 0.0,
+    "date": "1967-01-21",
+    "source": "FRED_API"
+  },
+  "housing_starts": {
+    "current": 1620.0,
+    "previous": 1667.0,
+    "change": -47.0,
+    "date": "1959-03-01",
+    "source": "FRED_API"
+  },
+  "industrial_production": {
+    "current": 4.516,
+    "previous": 4.6504,
+    "change": -0.1344000000000003,
+    "date": "1919-03-01",
+    "source": "FRED_API"
+  },
+  "capacity_utilization": {
+    "current": 87.0835,
+    "previous": 87.975,
+    "change": -0.8914999999999935,
+    "date": "1967-03-01",
+    "source": "FRED_API"
+  },
+  "ism_manufacturing": {
+    "current": NaN,
+    "previous": NaN,
+    "change": NaN,
+    "date": "1948-03-01",
+    "source": "FRED_API"
+  },
+  "vix_index": {
+    "current": 19.22,
+    "previous": 18.19,
+    "change": 1.0299999999999976,
+    "date": "1990-01-04",
+    "source": "FRED_API"
+  },
+  "money_supply_m2": {
+    "current": 289.2,
+    "previous": 287.7,
+    "change": 1.5,
+    "date": "1959-03-01",
+    "source": "FRED_API"
+  },
+  "tips_10y": {
+    "current": 2.46,
+    "previous": 2.43,
+    "change": 0.029999999999999805,
+    "date": "2003-01-06",
+    "source": "FRED_API"
+  },
+  "corporate_aaa": {
+    "current": 11.79,
+    "previous": 11.79,
+    "change": 0.0,
+    "date": "1983-01-05",
+    "source": "FRED_API"
+  },
+  "corporate_baa": {
+    "current": 11.36,
+    "previous": 11.35,
+    "change": 0.009999999999999787,
+    "date": "1986-01-06",
+    "source": "FRED_API"
+  },
+  "gdp_deflator": {
+    "current": 11.489,
+    "previous": 11.299,
+    "change": 0.19000000000000128,
+    "date": "1947-07-01",
+    "source": "FRED_API"
+  },
+  "personal_income": {
+    "current": NaN,
+    "previous": NaN,
+    "change": NaN,
+    "date": "1946-03-01",
+    "source": "FRED_API"
+  },
+  "retail_sales": {
+    "current": 158647.0,
+    "previous": 159189.0,
+    "change": -542.0,
+    "date": "1992-03-01",
+    "source": "FRED_API"
+  },
+  "durable_goods": {
+    "current": NaN,
+    "previous": NaN,
+    "change": NaN,
+    "date": "1958-04-01",
+    "source": "FRED_API"
+  },
+  "business_inventories": {
+    "current": NaN,
+    "previous": NaN,
+    "change": NaN,
+    "date": "1981-02-01",
+    "source": "FRED_API"
   }
 }

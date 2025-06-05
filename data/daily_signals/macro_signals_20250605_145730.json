@@ -1,0 +1,164 @@
+{
+  "timestamp": "2025-06-05T14:57:30.358724",
+  "analysis_date": "2025-06-05T14:57:30.358751",
+  "market_regime": {
+    "regime": "HIGH_INFLATION",
+    "confidence": 0.8,
+    "description": "High inflation environment",
+    "risk_level": "MODERATE"
+  },
+  "recession_probability": 0.221,
+  "market_conditions": {
+    "vix": 17.74,
+    "yield_curve_bps": 0.5000000000000004,
+    "unemployment": 4.0,
+    "inflation": 15.531
+  },
+  "fed_policy": {
+    "bias": "\ud83d\udfe2 NEUTRAL",
+    "rate_direction": "HOLD"
+  },
+  "trading_recommendation": "PROCEED",
+  "confidence": 0.8,
+  "reasons": [
+    "Stable HIGH_INFLATION regime with high confidence"
+  ],
+  "proceed_reason": "Stable HIGH_INFLATION regime with high confidence",
+  "economic_calendar": {
+    "next_fed_meeting": {
+      "date": "2025-06-18",
+      "type": "FOMC Meeting + SEP",
+      "completed": false,
+      "minutes_release": "2025-07-09",
+      "rate_cut_prob": 15.0,
+      "rate_hold_prob": 85.0,
+      "rate_hike_prob": 0.0,
+      "market_impact": "Very High",
+      "notes": "Next meeting - SEP & press conference",
+      "days_until": 13
+    },
+    "key_events_next_7_days": [
+      {
+        "date": "2025-06-05",
+        "name": "Initial Jobless Claims",
+        "time": "08:30 ET",
+        "impact": "Medium",
+        "forecast": "235K",
+        "days_until": 0
+      },
+      {
+        "date": "2025-06-06",
+        "name": "Non-Farm Payrolls",
+        "time": "08:30 ET",
+        "impact": "Very High",
+        "forecast": "142.5K",
+        "days_until": 1
+      },
+      {
+        "date": "2025-06-06",
+        "name": "Unemployment Rate",
+        "time": "08:30 ET",
+        "impact": "Very High",
+        "forecast": "4.2%",
+        "days_until": 1
+      },
+      {
+        "date": "2025-06-09",
+        "name": "FOMC Minutes Release",
+        "time": "18:00 ET",
+        "impact": "Very High",
+        "forecast": "May Meeting",
+        "days_until": 4
+      },
+      {
+        "date": "2025-06-11",
+        "name": "Core CPI (YoY)",
+        "time": "08:30 ET",
+        "impact": "Very High",
+        "forecast": "2.8%",
+        "days_until": 6
+      },
+      {
+        "date": "2025-06-11",
+        "name": "CPI (YoY)",
+        "time": "08:30 ET",
+        "impact": "Very High",
+        "forecast": "2.3%",
+        "days_until": 6
+      },
+      {
+        "date": "2025-06-12",
+        "name": "PPI (MoM)",
+        "time": "08:30 ET",
+        "impact": "High",
+        "forecast": "TBD",
+        "days_until": 7
+      }
+    ],
+    "today_events": [
+      {
+        "date": "2025-06-05",
+        "name": "Initial Jobless Claims",
+        "time": "08:30 ET",
+        "impact": "Medium",
+        "forecast": "235K",
+        "days_until": 0
+      }
+    ],
+    "morning_high_impact": [],
+    "optimization_triggers": {
+      "should_reoptimize": true,
+      "trigger_reason": [
+        "High-impact releases: Non-Farm Payrolls, Unemployment Rate"
+      ],
+      "urgency": "medium",
+      "suggested_focus": [
+        "earnings_quality_focus"
+      ],
+      "next_events": [
+        {
+          "date": "2025-06-05",
+          "name": "Initial Jobless Claims",
+          "time": "08:30 ET",
+          "impact": "Medium",
+          "forecast": "235K",
+          "days_until": 0
+        },
+        {
+          "date": "2025-06-06",
+          "name": "Non-Farm Payrolls",
+          "time": "08:30 ET",
+          "impact": "Very High",
+          "forecast": "142.5K",
+          "days_until": 1
+        },
+        {
+          "date": "2025-06-06",
+          "name": "Unemployment Rate",
+          "time": "08:30 ET",
+          "impact": "Very High",
+          "forecast": "4.2%",
+          "days_until": 1
+        },
+        {
+          "date": "2025-06-09",
+          "name": "FOMC Minutes Release",
+          "time": "18:00 ET",
+          "impact": "Very High",
+          "forecast": "May Meeting",
+          "days_until": 4
+        },
+        {
+          "date": "2025-06-11",
+          "name": "Core CPI (YoY)",
+          "time": "08:30 ET",
+          "impact": "Very High",
+          "forecast": "2.8%",
+          "days_until": 6
+        }
+      ]
+    },
+    "should_reoptimize": true,
+    "urgency": "medium"
+  }
+}

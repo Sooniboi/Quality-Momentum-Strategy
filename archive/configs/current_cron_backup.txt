@@ -1,0 +1,5 @@
+# Daily macro economic monitoring (10:00 AM BST / 5:00 AM ET)
+0 10 * * * cd /Users/maxsfolder/Desktop/Quality-Momentum-Strategy.git && /Users/maxsfolder/.pyenv/versions/3.11.6/bin/python daily_macro_monitor.py >> logs/macro_monitor.log 2>&1
+
+# Weekly portfolio reoptimization (Monday 10:00 AM BST / 5:00 AM ET)
+0 10 * * 1 cd /Users/maxsfolder/Desktop/Quality-Momentum-Strategy.git && /Users/maxsfolder/.pyenv/versions/3.11.6/bin/python start_live_trading.py >> logs/cron.log 2>&1 

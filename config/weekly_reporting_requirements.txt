@@ -1,0 +1,25 @@
+# Additional Requirements for Weekly Performance Reporting
+# Install with: pip install -r config/weekly_reporting_requirements.txt
+
+# Chart generation
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# LaTeX compilation (requires separate LaTeX installation)
+# For macOS: brew install --cask mactex
+# For Ubuntu: sudo apt-get install texlive-full
+# For Windows: Download and install MikTeX or TeX Live
+
+# Email functionality (usually included with Python)
+# smtplib (built-in)
+# email (built-in)
+# ssl (built-in)
+
+# File handling
+pathlib  # (built-in in Python 3.4+)
+
+# Already included in main requirements:
+# pandas
+# numpy  
+# python-dotenv
+# requests 

@@ -6,6 +6,7 @@ This script will:
 1. Test Alpaca connection (if keys already work, skip setup)
 2. Setup only if needed
 3. Start the live paper trading automation automatically
+4. Start automated weekly PDF email reports every Friday
 
 Usage:
     python start_live_trading.py
@@ -22,6 +23,7 @@ import time
 import schedule
 import logging
 import glob
+import threading
 from datetime import datetime
 
 # Load environment variables from .env file
@@ -42,9 +44,10 @@ except ImportError:
 
 def print_banner():
     """Print startup banner."""
-    print("🚀 QUALITY MOMENTUM STRATEGY - LIVE PAPER TRADING")
+    print("🚀 QUALITY MOMENTUM STRATEGY - LIVE AUTOMATION SUITE")
     print("=" * 70)
-    print("🤖 One-Click Launcher - Starting Live Automation...")
+    print("🤖 One-Click Launcher - Starting Complete Automation...")
+    print("📊 Trading + Weekly Email Reports")
     print(f"⏰ Started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print()
 
@@ -84,6 +87,39 @@ def check_basic_setup():
     
     print("✅ Trading configuration found!")
     return True
+
+def start_weekly_reporter():
+    """Start the automated weekly reporting system."""
+    print("📧 Starting automated weekly email reporting...")
+    
+    try:
+        # Import and start the weekly reporter
+        sys.path.insert(0, 'src/utils')
+        from weekly_performance_reporter import WeeklyPerformanceReporter
+        
+        reporter = WeeklyPerformanceReporter()
+        
+        # Schedule weekly reports for Friday 4 PM
+        schedule.every().friday.at("16:00").do(reporter.generate_weekly_report)
+        
+        print("✅ Weekly reporter scheduled for every Friday at 4:00 PM EST")
+        print("📧 Will automatically send PDF reports with native LaTeX tables")
+        print("🎯 No images - pure LaTeX tables and charts only")
+        
+        # Run a test report immediately
+        print("🧪 Running test report to verify system...")
+        test_success = reporter.generate_weekly_report()
+        
+        if test_success:
+            print("✅ Test report generated and sent successfully!")
+        else:
+            print("⚠️ Test report had issues - check logs")
+        
+        return True
+        
+    except Exception as e:
+        print(f"❌ Failed to start weekly reporter: {e}")
+        return False
 
 def run_pipeline_once():
     """Run the complete pipeline once with portfolio validation."""
@@ -409,14 +445,29 @@ def setup_logging():
     )
     return logging.getLogger(__name__)
 
+def run_weekly_reporter_background():
+    """Run weekly reporter in background thread."""
+    try:
+        while True:
+            schedule.run_pending()
+            time.sleep(60)  # Check every minute
+    except Exception as e:
+        print(f"❌ Weekly reporter background error: {e}")
+
 def start_live_automation():
-    """Start the live trading automation with automatic scheduling."""
-    print("🤖 Starting automated live trading...")
-    print("📅 Schedule: Monthly (every 4 weeks) on Monday at 10:00 AM")
-    print("⚡ The system will run continuously and execute trades automatically")
+    """Start the complete live automation system."""
+    print("🤖 Starting complete automation system...")
+    print("📅 Trading: Monthly (every 4 weeks) on Monday at 10:00 AM")
+    print("📧 Reports: Weekly on Friday at 4:00 PM")
+    print("⚡ Both systems will run continuously and execute automatically")
     print()
     
     logger = setup_logging()
+    
+    # Start weekly reporter
+    weekly_success = start_weekly_reporter()
+    if not weekly_success:
+        print("⚠️ Weekly reporter failed to start - continuing with trading only")
     
     def scheduled_pipeline():
         """Scheduled pipeline execution."""
@@ -446,12 +497,20 @@ def start_live_automation():
     
     print(f"\n📅 Next scheduled run: {schedule.next_run()}")
     print("\n📁 Monitor these files:")
-    print("  • logs/live_trading_automation.log - Automation activity")
+    print("  • logs/live_trading_automation.log - Trading automation activity")
+    print("  • logs/weekly_reporter.log - Weekly report generation")
     print("  • logs/alpaca_trading.log - Trading activity")
+    print("  • Your email inbox - Weekly PDF reports every Friday")
     print("  • Your Alpaca dashboard - Live positions")
     print("\n💡 Press Ctrl+C to stop the automation")
     
-    # Run the scheduler
+    # Start weekly reporter in background thread
+    if weekly_success:
+        reporter_thread = threading.Thread(target=run_weekly_reporter_background, daemon=True)
+        reporter_thread.start()
+        print("✅ Weekly reporter running in background")
+    
+    # Run the main scheduler
     try:
         while True:
             schedule.run_pending()
@@ -459,7 +518,7 @@ def start_live_automation():
             
     except KeyboardInterrupt:
         print("\n\n⚠️ Automation stopped by user")
-        print("🛑 Live trading automation has been halted")
+        print("🛑 Live trading and weekly reporting automation has been halted")
         logger.info("Automation stopped by user")
         return True
 
@@ -486,17 +545,30 @@ def main():
         print("❌ Basic configuration missing!")
         return 1
     
-    # Step 3: Start live automation immediately
-    print("\n🤖 STARTING LIVE AUTOMATION...")
+    # Step 3: Start complete automation system
+    print("\n🤖 STARTING COMPLETE AUTOMATION SUITE...")
     print("=" * 50)
     
     print("🚀 Your Quality Momentum Strategy is now running FULLY AUTOMATED!")
     print("\n📊 What happens automatically:")
-    print("  • Monthly data collection and analysis")
-    print("  • Signal generation based on quality metrics")
-    print("  • Portfolio rebalancing via Alpaca paper trading")
-    print("  • Continuous monitoring and execution")
-    print("  • No user input required!")
+    print("  TRADING AUTOMATION:")
+    print("    • Monthly data collection and analysis")
+    print("    • Signal generation based on quality metrics")
+    print("    • Portfolio rebalancing via Alpaca paper trading")
+    print("    • Continuous monitoring and execution")
+    print()
+    print("  📧 WEEKLY EMAIL REPORTS:")
+    print("    • Every Friday at 4:00 PM EST")
+    print("    • Professional PDF with native LaTeX tables")
+    print("    • Complete portfolio analysis and performance attribution")
+    print("    • Quality metrics, sector allocation, risk analysis")
+    print("    • NO IMAGES - Pure LaTeX tables and charts only")
+    print("    • Sent automatically to your email")
+    print()
+    print("  🎯 ZERO MAINTENANCE REQUIRED!")
+    print("    • No user input needed")
+    print("    • Self-sustaining system")
+    print("    • Robust error handling and fallbacks")
     
     try:
         start_live_automation()
