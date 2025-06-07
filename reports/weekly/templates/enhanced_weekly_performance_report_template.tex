@@ -147,13 +147,15 @@
 \subsection{Complete Holdings Analysis}
 \renewcommand{\arraystretch}{1.2}
 \small  % Make the entire table smaller
-\begin{longtable}{|l|r|r|r|r|r|r|l|}
+\begin{longtable}{|l|>{\raggedleft\arraybackslash}r|>{\raggedleft\arraybackslash}r|>{\raggedleft\arraybackslash}r|>{\raggedleft\arraybackslash}r|>{\raggedleft\arraybackslash}r|>{\raggedleft\arraybackslash}r|l|}
 \hline
-\multicolumn{1}{|c|}{\textbf{Ticker}} & \multicolumn{1}{c|}{\textbf{Shares}} & \multicolumn{1}{c|}{\textbf{Price}} & \multicolumn{1}{c|}{\textbf{Market Value}} & \multicolumn{1}{c|}{\textbf{Weight}} & \multicolumn{1}{c|}{\textbf{P\&L}} & \multicolumn{1}{c|}{\textbf{Return}} & \multicolumn{1}{c|}{\textbf{Sector}} \\
+\rowcolor{primary!15}
+\textbf{Ticker} & \textbf{Shares} & \textbf{Price} & \textbf{Market Value} & \textbf{Weight} & \textbf{P\&L} & \textbf{Return} & \textbf{Sector} \\
 \hline
 \endfirsthead
 \hline
-\multicolumn{1}{|c|}{\textbf{Ticker}} & \multicolumn{1}{c|}{\textbf{Shares}} & \multicolumn{1}{c|}{\textbf{Price}} & \multicolumn{1}{c|}{\textbf{Market Value}} & \multicolumn{1}{c|}{\textbf{Weight}} & \multicolumn{1}{c|}{\textbf{P\&L}} & \multicolumn{1}{c|}{\textbf{Return}} & \multicolumn{1}{c|}{\textbf{Sector}} \\
+\rowcolor{primary!15}
+\textbf{Ticker} & \textbf{Shares} & \textbf{Price} & \textbf{Market Value} & \textbf{Weight} & \textbf{P\&L} & \textbf{Return} & \textbf{Sector} \\
 \hline
 \endhead
 {{HOLDINGS_TABLE_ROWS}}
@@ -168,7 +170,7 @@
 
 \renewcommand{\arraystretch}{1.3}
 
-\begin{tabularx}{\textwidth}{|X|c|c|c|}
+\begin{tabularx}{\textwidth}{|X|>{\raggedleft\arraybackslash}c|>{\raggedleft\arraybackslash}c|>{\raggedleft\arraybackslash}c|}
 \hline
 \rowcolor{primary!15}
 \textbf{Sector} & \textbf{Allocation} & \textbf{Weekly Return} & \textbf{Performance} \\
@@ -209,7 +211,7 @@
 \subsection{Factor Performance Analysis}
 
 \renewcommand{\arraystretch}{1.3}
-\begin{tabularx}{\textwidth}{|X|c|c|c|c|}
+\begin{tabularx}{\textwidth}{|X|>{\raggedleft\arraybackslash}c|>{\raggedleft\arraybackslash}c|>{\raggedleft\arraybackslash}c|>{\raggedleft\arraybackslash}c|}
 \hline
 \rowcolor{secondary!15}
 \textbf{Factor} & \textbf{Allocation} & \textbf{Weekly Return} & \textbf{3M Return} & \textbf{Performance} \\
@@ -251,7 +253,7 @@
 % Top 5 Contributors
 \renewcommand{\arraystretch}{1.3}
 \begin{center}
-\begin{tabularx}{\textwidth}{|X|X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|c|}
+\begin{tabularx}{\textwidth}{|X|X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}c|}
 \hline
 \rowcolor{accent!15}
 \multicolumn{5}{|c|}{\textbf{Top 5 Contributors}} \\
@@ -268,7 +270,7 @@
 % Bottom 5 Contributors
 \renewcommand{\arraystretch}{1.3}
 \begin{center}
-\begin{tabularx}{\textwidth}{|X|X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|c|}
+\begin{tabularx}{\textwidth}{|X|X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}c|}
 \hline
 \rowcolor{bullish!15}
 \multicolumn{5}{|c|}{\textbf{Bottom 5 Contributors}} \\
