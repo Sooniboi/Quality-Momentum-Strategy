@@ -6,7 +6,11 @@ import os
 def load_sp600_from_wikipedia(save_csv: bool = True) -> pd.DataFrame:
     # Wikipedia URL for S&P 600 constituents
     wiki_url = "https://en.wikipedia.org/wiki/List_of_S%26P_600_companies"
-    tables = pd.read_html(wiki_url)
+    # Wikipedia refuses requests without a browser-like User-Agent (HTTP 403).
+    from io import StringIO
+    html = requests.get(wiki_url, headers={"User-Agent": "Mozilla/5.0 (quality-momentum-strategy; research use)"}, timeout=30)
+    html.raise_for_status()
+    tables = pd.read_html(StringIO(html.text))
     
     # The first table on the page is the constituents table
     df = tables[0]

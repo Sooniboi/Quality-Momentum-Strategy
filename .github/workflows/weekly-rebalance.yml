@@ -1,0 +1,76 @@
+name: Weekly rebalance of the paper book
+
+# Every Monday before the New York open: refresh the S&P 600 universe and fundamentals, re-run the
+# sector scoring, macro overlay and portfolio construction, then rebalance the Alpaca PAPER account
+# to the new selection. Nothing here touches a live brokerage account: the connector only knows the
+# paper endpoint.
+#
+# Secrets needed on this repository:
+#   FMP_API_KEY, FRED_API_KEY, ALPACA_API_KEY, ALPACA_SECRET_KEY
+# Run it by hand from the Actions tab with "dry run" ticked to see the orders without sending them.
+
+on:
+  schedule:
+    - cron: "0 12 * * 1" # Monday 12:00 UTC: 08:00 New York in summer, 07:00 in winter
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run: print the sell and buy list but send no orders"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: weekly-rebalance
+  cancel-in-progress: false
+
+jobs:
+  rebalance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    env:
+      FMP_API_KEY: ${{ secrets.FMP_API_KEY }}
+      FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+      ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
+      ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+      ALPACA_BASE_URL: https://paper-api.alpaca.markets
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install
+        run: |
+          pip install --quiet "pandas>=2.1,<2.2" "numpy<2" scipy requests alpaca-trade-api fredapi lxml beautifulsoup4 tqdm matplotlib python-dotenv scikit-learn pandas-datareader
+
+      - name: Universe (falls back to the last saved list if Wikipedia refuses)
+        run: python src/data_collection/01_universe_collection.py || echo "Universe refresh failed; using the last saved list."
+
+      - name: Fundamentals and momentum
+        run: python src/data_collection/02_fundamental_data_collection.py
+
+      - name: Sector scoring
+        run: python src/analysis/03_sector_scoring_analysis.py
+
+      - name: Macro overlay
+        run: python src/analysis/04_macro_economic_analysis.py
+
+      - name: Portfolio construction
+        run: python src/portfolio/05_unified_portfolio_construction.py
+
+      - name: Rebalance the paper account
+        env:
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          if [ "$DRY_RUN" = "true" ]; then python rebalance.py; else python rebalance.py --execute; fi
+
+      - name: Keep this week's selection in the repository
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/processed/portfolios src/csv_data_files data/signals || true
+          git diff --cached --quiet || (git commit -m "Weekly run $(date -u +%Y-%m-%d): selection and signals" && git push)
