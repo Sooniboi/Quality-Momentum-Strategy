@@ -128,7 +128,7 @@ class AlpacaPaperTrader:
                 'cash': float(account.cash),
                 'market_value': float(account.long_market_value),
                 'status': account.status,
-                'day_trades': account.daytrade_count
+                'day_trades': getattr(account, 'daytrade_count', 0)  # not present in newer API versions
             }
         except Exception as e:
             self.logger.error(f"Error getting account info: {e}")
